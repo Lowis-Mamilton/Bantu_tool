@@ -1,17 +1,18 @@
 {
-  "name": "班表管理",
-  "short_name": "班表",
+  "name": "班圖 Bantu",
+  "short_name": "班圖",
   "description": "排班紀錄、時數統計與薪資估算",
   "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#F7F8FA",
+  "background_color": "#faf8f4",
   "theme_color": "#4F7CFF",
   "orientation": "portrait",
   "icons": [
     {
-      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect width='192' height='192' rx='40' fill='%234F7CFF'/><text x='96' y='130' font-size='110' text-anchor='middle' fill='white'>📅</text></svg>",
-      "sizes": "192x192",
-      "type": "image/svg+xml"
+      "src": "./icon/bantuicon.png",
+      "sizes": "2362x2362",
+      "type": "image/png",
+      "purpose": "any maskable"
     }
   ]
 }

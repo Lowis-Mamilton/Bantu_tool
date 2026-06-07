@@ -1,5 +1,5 @@
-const CACHE = 'bantu-v1';
-const ASSETS = ['./index.html', './manifest.json'];
+const CACHE = 'bantu-v2';
+const ASSETS = ['./index.html', './manifest.json', './icon/bantuicon.png'];
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)));
