@@ -186,6 +186,18 @@ nav{position:fixed;bottom:0;left:0;right:0;height:calc(var(--nav-h) + var(--safe
 .empty-state{text-align:center;padding:36px 20px;color:var(--t2)}
 .empty-state .ei{font-size:44px;margin-bottom:10px}
 .empty-state p{font-size:14px;line-height:1.6}
+/* Template list in settings */
+.tpl-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--bd)}
+.tpl-row:last-child{border-bottom:none}
+.tpl-row-info{flex:1;min-width:0}
+.tpl-row-name{font-size:14px;font-weight:600}
+.tpl-row-sub{font-size:12px;color:var(--t3);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* Quick-apply chips in modal */
+.qa-section{padding:8px 22px 2px}
+.qa-lbl{font-size:11px;font-weight:600;color:var(--t3);letter-spacing:.5px;text-transform:uppercase;margin-bottom:7px}
+.qa-chips{display:flex;flex-wrap:wrap;gap:7px}
+.qa-chip{display:flex;align-items:center;gap:5px;padding:7px 13px;border-radius:18px;font-size:13px;font-weight:600;cursor:pointer;border:1.5px solid;transition:transform .1s,opacity .1s}
+.qa-chip:active{transform:scale(.95);opacity:.8}
 </style>
 </head>
 <body>
@@ -298,6 +310,40 @@ nav{position:fixed;bottom:0;left:0;right:0;height:calc(var(--nav-h) + var(--safe
         </div>
       </div>
     </div>
+    <!-- Templates -->
+    <div class="sec-label" id="set-sec-tpl-lbl">固定班次</div>
+    <div class="set-group" id="templates-group">
+      <div class="set-row" style="flex-direction:column;align-items:flex-start;gap:10px">
+        <div id="tpl-list" style="width:100%"></div>
+        <button class="add-job-btn" id="btn-add-tpl"></button>
+        <div class="job-form" id="tpl-form">
+          <div class="job-form-row">
+            <div class="job-form-label" id="tf-name-lbl">班次名稱</div>
+            <input type="text" id="tpl-name-input" class="job-form-input" maxlength="10">
+          </div>
+          <div class="job-form-row">
+            <div class="job-form-label" id="tf-job-lbl">工作</div>
+            <div class="job-picker" id="tpl-job-picker" style="gap:6px"></div>
+          </div>
+          <div class="job-form-row">
+            <div class="job-form-label" id="tf-time-lbl">時間</div>
+            <div style="display:flex;align-items:center;gap:8px">
+              <input type="time" class="job-form-input" id="tpl-start" style="flex:1;padding:9px 10px">
+              <span style="color:var(--t3);flex-shrink:0">→</span>
+              <input type="time" class="job-form-input" id="tpl-end" style="flex:1;padding:9px 10px">
+            </div>
+          </div>
+          <div class="job-form-row">
+            <div class="job-form-label" id="tf-note-lbl">備註（選填）</div>
+            <input type="text" id="tpl-note-input" class="job-form-input">
+          </div>
+          <div class="job-form-btns">
+            <button class="jfb-cancel" id="tfb-cancel" onclick="cancelTplForm()"></button>
+            <button class="jfb-save" id="tfb-save-btn" onclick="confirmTplForm()"></button>
+          </div>
+        </div>
+      </div>
+    </div>
     <!-- Pay -->
     <div class="sec-label" id="set-sec-pay-lbl">預設薪資設定</div>
     <div class="set-group">
@@ -305,6 +351,7 @@ nav{position:fixed;bottom:0;left:0;right:0;height:calc(var(--nav-h) + var(--safe
       <div class="set-row"><div class="set-icon" style="background:#fbf2e3">🍽️</div><div class="set-lbl" id="set-lbl-break">休息扣除</div><input type="number" class="set-input" id="set-break" min="0" step="15" style="width:70px"><span class="set-val" id="set-val-break">分鐘</span></div>
       <div class="set-row"><div class="set-icon" style="background:#ecebf5">📊</div><div class="set-lbl" id="set-lbl-ot">加班費率</div><input type="number" class="set-input" id="set-ot" min="1" step="0.01" style="width:80px"><span class="set-val" id="set-val-ot">倍</span></div>
       <div class="set-row"><div class="set-icon" style="background:#f0ebe0">⏰</div><div class="set-lbl" id="set-lbl-std">每日標準工時</div><input type="number" class="set-input" id="set-std" min="1" step="0.5" style="width:70px"><span class="set-val" id="set-val-std">小時</span></div>
+      <div class="set-row"><div class="set-icon" style="background:#fce8e6">➖</div><div class="set-lbl" id="set-lbl-deduction">月固定扣款</div><span class="set-val" id="set-val-deduction-unit" style="margin-right:4px">NT$</span><input type="number" class="set-input" id="set-deduction" min="0" step="1" style="width:90px"></div>
     </div>
     <!-- Data -->
     <div class="sec-label" id="set-sec-data-lbl">資料</div>
@@ -364,6 +411,7 @@ nav{position:fixed;bottom:0;left:0;right:0;height:calc(var(--nav-h) + var(--safe
         <div class="modal-title" id="modal-edit-title">新增班次</div>
         <button class="modal-close" onclick="closeModal()">✕</button>
       </div>
+      <div id="quick-apply-section"></div>
       <div class="form-group">
         <div class="form-label" id="f-lbl-job">工作</div>
         <div class="job-picker" id="f-job-picker"></div>
@@ -436,6 +484,7 @@ const LANGS = {
     setHourly:'預設時薪',setBreak:'休息扣除',setBreakUnit:'分鐘',
     setOt:'加班費率',setOtUnit:'倍',
     setStd:'每日標準工時',setStdUnit:'小時',
+    setDeduction:'月固定扣款',setDeductionUnit:'NT$',salDeductLbl:'扣款',
     secData:'資料',
     setExport:'匯出資料（JSON）',setClear:'清除所有班次',
     version:'班圖 Bantu v2.0 · 多工作支援',
@@ -451,6 +500,11 @@ const LANGS = {
     keepJob:'至少保留一個工作',
     clearConfirm:'確定要清除所有班次資料？\n此操作無法復原！',
     cleared:'資料已清除',fillTime:'請填寫時間',
+    secTpl:'固定班次',addTplBtn:'＋ 新增固定班次',
+    tfName:'班次名稱',tfNamePh:'例如：早班、大夜…',tfJob:'工作',tfTime:'時間',tfNote:'備註（選填）',
+    tfAdd:'新增固定班次',tfSave:'儲存',tfCancel:'取消',
+    delTpl:'確定刪除此固定班次？',
+    quickApply:'快速套用',noTpl:'尚無固定班次',
   },
   en:{
     greet:['Night 🌙','Morning ☀️','Afternoon 🌤','Evening 🌇'],
@@ -487,6 +541,7 @@ const LANGS = {
     setHourly:'Hourly Rate',setBreak:'Break Deduction',setBreakUnit:'min',
     setOt:'OT Rate',setOtUnit:'x',
     setStd:'Standard Daily Hrs',setStdUnit:'hrs',
+    setDeduction:'Monthly Deductions',setDeductionUnit:'NT$',salDeductLbl:'deduct',
     secData:'Data',
     setExport:'Export Data (JSON)',setClear:'Clear All Shifts',
     version:'Bantu v2.0 · Multi-job',
@@ -502,6 +557,11 @@ const LANGS = {
     keepJob:'Keep at least one job',
     clearConfirm:'Clear all shift data?\nThis cannot be undone!',
     cleared:'Data cleared',fillTime:'Please fill in the time',
+    secTpl:'Shift Templates',addTplBtn:'+ Add Template',
+    tfName:'Template Name',tfNamePh:'e.g. Morning, Night…',tfJob:'Job',tfTime:'Time',tfNote:'Note (optional)',
+    tfAdd:'Add Template',tfSave:'Save',tfCancel:'Cancel',
+    delTpl:'Delete this template?',
+    quickApply:'Quick Apply',noTpl:'No templates yet',
   }
 };
 
@@ -509,11 +569,12 @@ const LANGS = {
 const JOB_PALETTE=['#3f9d72','#d9a23f','#6b62c4','#e05252','#0891b2','#f97316','#8b5cf6','#ec4899','#2563eb','#0d9488'];
 
 const DEFAULT_CFG={
-  lang:'zh',defaultRate:200,breakMinutes:0,otRate:1.34,stdHours:8,
+  lang:'zh',defaultRate:200,breakMinutes:0,otRate:1.34,stdHours:8,deduction:758,
   jobs:[
     {id:'j1',name:'工作1',color:'#3f9d72',hourlyRate:null},
     {id:'j2',name:'工作2',color:'#d9a23f',hourlyRate:null},
-  ]
+  ],
+  templates:[]
 };
 
 function migrateShifts(raw){
@@ -531,6 +592,7 @@ function uid(){return Math.random().toString(36).slice(2,10)}
 let shifts=migrateShifts(ld(SK,{}));
 let cfg={...DEFAULT_CFG,...ld(CK,{})};
 if(!Array.isArray(cfg.jobs)||!cfg.jobs.length) cfg.jobs=DEFAULT_CFG.jobs;
+if(!Array.isArray(cfg.templates)) cfg.templates=[];
 if(!cfg.lang) cfg.lang='zh';
 
 let lang=cfg.lang;
@@ -555,7 +617,7 @@ function autoClassLabel(start){
   if(!start) return '';
   const[h,m]=start.split(':').map(Number),mins=h*60+m;
   if(mins<630) return L().cat[0];
-  if(mins<=810) return L().cat[1];
+  if(mins<870) return L().cat[1];
   return L().cat[2];
 }
 
@@ -608,6 +670,14 @@ function applyLang(){
   document.getElementById('new-job-rate').placeholder=L().jfRatePh;
   document.getElementById('jf-color-lbl').textContent=L().jfColor;
   document.getElementById('jfb-cancel').textContent=L().jfCancel;
+  document.getElementById('set-sec-tpl-lbl').textContent=L().secTpl;
+  document.getElementById('btn-add-tpl').textContent=L().addTplBtn;
+  document.getElementById('tf-name-lbl').textContent=L().tfName;
+  document.getElementById('tpl-name-input').placeholder=L().tfNamePh;
+  document.getElementById('tf-job-lbl').textContent=L().tfJob;
+  document.getElementById('tf-time-lbl').textContent=L().tfTime;
+  document.getElementById('tf-note-lbl').textContent=L().tfNote;
+  document.getElementById('tfb-cancel').textContent=L().tfCancel;
   document.getElementById('set-sec-pay-lbl').textContent=L().secPay;
   document.getElementById('set-lbl-hourly').textContent=L().setHourly;
   document.getElementById('set-lbl-break').textContent=L().setBreak;
@@ -616,6 +686,8 @@ function applyLang(){
   document.getElementById('set-val-ot').textContent=L().setOtUnit;
   document.getElementById('set-lbl-std').textContent=L().setStd;
   document.getElementById('set-val-std').textContent=L().setStdUnit;
+  document.getElementById('set-lbl-deduction').textContent=L().setDeduction;
+  document.getElementById('set-val-deduction-unit').textContent=L().setDeductionUnit;
   document.getElementById('set-sec-data-lbl').textContent=L().secData;
   document.getElementById('set-lbl-export').textContent=L().setExport;
   document.getElementById('set-lbl-clear').textContent=L().setClear;
@@ -789,8 +861,11 @@ function renderStats(){
     byJob[s.jobId].hours+=hrs;byJob[s.jobId].count++;byJob[s.jobId].pay+=pay;
   }));
   const days=entries.length,avg=days?totalH/days:0;
-  document.getElementById('salary-val').textContent=`NT$ ${Math.round(salary).toLocaleString()}`;
-  document.getElementById('salary-det').textContent=L().salDet(days,sc,totalH.toFixed(1));
+  const deduction=cfg.deduction||0;
+  const net=Math.max(0,Math.round(salary)-deduction);
+  document.getElementById('salary-val').textContent=`NT$ ${net.toLocaleString()}`;
+  const deductStr=deduction>0?` · ${t('salDeductLbl')} NT$${deduction.toLocaleString()}`:'';
+  document.getElementById('salary-det').textContent=L().salDet(days,sc,totalH.toFixed(1))+deductStr;
   document.getElementById('stat-hours').textContent=totalH.toFixed(1);
   document.getElementById('stat-days').textContent=days;
   document.getElementById('stat-shifts').textContent=sc;
@@ -810,16 +885,19 @@ function renderSettings(){
   document.getElementById('set-break').value=cfg.breakMinutes??0;
   document.getElementById('set-ot').value=cfg.otRate??1.34;
   document.getElementById('set-std').value=cfg.stdHours??8;
-  ['set-hourly','set-break','set-ot','set-std'].forEach(id=>{
+  document.getElementById('set-deduction').value=cfg.deduction??758;
+  ['set-hourly','set-break','set-ot','set-std','set-deduction'].forEach(id=>{
     document.getElementById(id).oninput=()=>{
       cfg.defaultRate=parseFloat(document.getElementById('set-hourly').value)||0;
       cfg.breakMinutes=parseInt(document.getElementById('set-break').value)||0;
       cfg.otRate=parseFloat(document.getElementById('set-ot').value)||1.34;
       cfg.stdHours=parseFloat(document.getElementById('set-std').value)||8;
+      cfg.deduction=parseFloat(document.getElementById('set-deduction').value)||0;
       sv(CK,cfg);
     };
   });
   renderJobTags();
+  renderTemplateTags();
 }
 
 function renderJobTags(){
@@ -880,6 +958,102 @@ function renderSwatches(){
     btn.onclick=()=>{_selColor=c;renderSwatches()};
     wrap.appendChild(btn);
   });
+}
+
+// ── Templates ──
+function renderTemplateTags(){
+  const wrap=document.getElementById('tpl-list');wrap.innerHTML='';
+  if(!cfg.templates.length){
+    wrap.innerHTML=`<div style="font-size:13px;color:var(--t3);padding:4px 0">${t('noTpl')}</div>`;
+    return;
+  }
+  cfg.templates.forEach(tpl=>{
+    const job=getJob(tpl.jobId);
+    const el=document.createElement('div');el.className='tpl-row';
+    el.innerHTML=`<div class="bd-dot" style="background:${job.color};flex-shrink:0"></div><div class="tpl-row-info"><div class="tpl-row-name">${tpl.name}</div><div class="tpl-row-sub">${job.name} · ${tpl.start}–${tpl.end}${tpl.note?' · '+tpl.note:''}</div></div><button class="dsc-edit-btn" onclick="openTplForm('${tpl.id}');event.stopPropagation()" style="flex-shrink:0">✏️</button><button class="dsc-del-btn" onclick="deleteTpl('${tpl.id}');event.stopPropagation()" style="flex-shrink:0">🗑</button>`;
+    wrap.appendChild(el);
+  });
+}
+
+function deleteTpl(id){
+  if(!confirm(t('delTpl'))) return;
+  cfg.templates=cfg.templates.filter(t=>t.id!==id);sv(CK,cfg);renderTemplateTags();
+}
+
+document.getElementById('btn-add-tpl').onclick=()=>openTplForm(null);
+
+let _tplId=null,_tplSelJobId=null;
+function openTplForm(tplId){
+  _tplId=tplId;
+  const ex=tplId?cfg.templates.find(t=>t.id===tplId):null;
+  _tplSelJobId=ex?.jobId||cfg.jobs[0].id;
+  document.getElementById('tpl-name-input').value=ex?.name||'';
+  document.getElementById('tpl-start').value=ex?.start||'09:00';
+  document.getElementById('tpl-end').value=ex?.end||'18:00';
+  document.getElementById('tpl-note-input').value=ex?.note||'';
+  document.getElementById('tfb-save-btn').textContent=tplId?t('tfSave'):t('tfAdd');
+  document.getElementById('btn-add-tpl').style.display='none';
+  document.getElementById('tpl-form').style.display='block';
+  renderTplJobPicker();
+  document.getElementById('tpl-name-input').focus();
+}
+function cancelTplForm(){
+  document.getElementById('tpl-form').style.display='none';
+  document.getElementById('btn-add-tpl').style.display='';
+  _tplId=null;_tplSelJobId=null;
+}
+function renderTplJobPicker(){
+  const wrap=document.getElementById('tpl-job-picker');wrap.innerHTML='';
+  cfg.jobs.forEach(j=>{
+    const sel=j.id===_tplSelJobId;
+    const btn=document.createElement('button');
+    btn.className='job-option'+(sel?' selected':'');
+    btn.style.cssText=`background:${sel?j.color:''};border-color:${sel?j.color:''};padding:6px 12px;font-size:12px`;
+    btn.innerHTML=`<span class="jo-dot" style="background:${j.color}"></span>${j.name}`;
+    btn.onclick=()=>{_tplSelJobId=j.id;renderTplJobPicker()};
+    wrap.appendChild(btn);
+  });
+}
+function confirmTplForm(){
+  const name=document.getElementById('tpl-name-input').value.trim().slice(0,10);
+  if(!name){document.getElementById('tpl-name-input').focus();return}
+  const start=document.getElementById('tpl-start').value;
+  const end=document.getElementById('tpl-end').value;
+  if(!start||!end){alert(t('fillTime'));return}
+  const note=document.getElementById('tpl-note-input').value.trim();
+  const obj={id:_tplId||'tpl'+Date.now(),name,jobId:_tplSelJobId,start,end,note};
+  if(_tplId){const i=cfg.templates.findIndex(t=>t.id===_tplId);if(i>-1)cfg.templates[i]=obj}
+  else cfg.templates.push(obj);
+  sv(CK,cfg);cancelTplForm();renderTemplateTags();
+}
+
+function renderQuickApply(){
+  const sec=document.getElementById('quick-apply-section');sec.innerHTML='';
+  if(!cfg.templates.length) return;
+  const lbl=document.createElement('div');lbl.className='qa-section';
+  lbl.innerHTML=`<div class="qa-lbl">${t('quickApply')}</div><div class="qa-chips" id="qa-chips-wrap"></div>`;
+  sec.appendChild(lbl);
+  const wrap=document.getElementById('qa-chips-wrap');
+  cfg.templates.forEach(tpl=>{
+    const job=getJob(tpl.jobId);
+    const chip=document.createElement('button');chip.className='qa-chip';
+    chip.style.cssText=`background:${hex2light(job.color,.85)};border-color:${hex2light(job.color,.6)};color:${job.color}`;
+    chip.innerHTML=`<span style="width:6px;height:6px;border-radius:50%;background:${job.color};display:inline-block"></span>${tpl.name}`;
+    chip.onclick=()=>applyTemplate(tpl);
+    wrap.appendChild(chip);
+  });
+}
+function applyTemplate(tpl){
+  const picker=document.getElementById('f-job-picker');
+  picker.querySelectorAll('.job-option').forEach((b,i)=>{
+    const jc=cfg.jobs[i];if(!jc)return;
+    const sel=jc.id===tpl.jobId;
+    b.classList.toggle('selected',sel);b.style.background=sel?jc.color:'';b.style.borderColor=sel?jc.color:'';
+  });
+  document.getElementById('f-start').value=tpl.start;
+  document.getElementById('f-end').value=tpl.end;
+  document.getElementById('f-note').value=tpl.note||'';
+  updatePreview();
 }
 
 document.getElementById('btn-export').onclick=()=>{
@@ -947,6 +1121,7 @@ function openEditView(shiftId){
   document.getElementById('f-start').value=ex?.start||'09:00';
   document.getElementById('f-end').value=ex?.end||'18:00';
   document.getElementById('f-note').value=ex?.note||'';
+  renderQuickApply();
   updatePreview();
 }
 
