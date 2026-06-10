@@ -9,7 +9,9 @@ Bantu is a single-file PWA shift-scheduling app written in pure vanilla HTML/CSS
 ```
 index.html      Main app (~1100+ lines, all CSS/JS included)
 manifest.json   PWA manifest (name, icon, display mode)
-sw.js           Service worker (cache version: bantu-v3)
+sw.js           Service worker (cache version: bantu-v4)
+robots.txt      SEO crawler rules (points to sitemap.xml)
+sitemap.xml     SEO sitemap (single page)
 icon/
   bantuicon.png App icon (2362×2362 PNG)
 ```
@@ -83,6 +85,18 @@ cfg = {
 - 10:30–14:29 → Afternoon (中班, index 1)
 - >= 14:30 → Evening (晚班, index 2)
 
+### PWA install banner
+- `#install-banner` on the Today page tells users the app can be installed to their home screen
+- Hidden if already running standalone (`isStandalone()`, checks `display-mode: standalone` / `navigator.standalone`) or if previously dismissed (`localStorage['bantu_install_dismissed']`)
+- On iOS, shows static "tap Share → Add to Home Screen" instructions (no install button, since iOS Safari has no `beforeinstallprompt`)
+- On Android/Chrome, `beforeinstallprompt` is captured into `deferredInstallPrompt`; the banner shows an "Install" button that calls `installApp()` (`deferredInstallPrompt.prompt()`)
+- `renderInstallBanner()` is called from `applyLang()` so banner text updates with language switches
+
+### SEO
+- `<head>` includes `meta description`/`keywords`/`robots`, OG/Twitter tags, `rel=canonical`, and a `WebApplication` JSON-LD block — all pointing at the deployed URL `https://bantu.bantutw.workers.dev/`
+- `robots.txt` and `sitemap.xml` at the repo root reference the same canonical URL
+- If the deployment URL ever changes, update all of: canonical link, OG/Twitter `*:url`/`*:image`, JSON-LD `url`/`image`, `robots.txt`, and `sitemap.xml`
+
 ### Stats page charts
 - `computeMonthStats(y, m)` aggregates one month's shifts into `{totalH, workedH, sc, salary, byJob, days, catCounts, wdHours}`
   - `catCounts` — shift counts per `autoClassIndex` bucket (早/中/晚班), used by `renderCatBreakdown()` (`#cat-breakdown`, `CAT_COLORS`)
@@ -113,6 +127,6 @@ const JOB_PALETTE = [
 ## Notes
 
 - When changing any displayed text, **both languages (zh/en) must be updated together**, and static DOM elements must also be updated in `applyLang()`
-- Service worker cache version is currently `bantu-v3` — bump it whenever `index.html` (or other cached assets) changes, so installed PWA users get the update
+- Service worker cache version is currently `bantu-v4` — bump it whenever `index.html` (or other cached assets) changes, so installed PWA users get the update
 - `migrateShifts()` handles backward compatibility from v2 (single object per day) to v3 (array per day)
 - No external frameworks or CDNs — keep this a single offline-capable file

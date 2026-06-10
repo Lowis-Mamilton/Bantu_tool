@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://bantu.bantutw.workers.dev/sitemap.xml

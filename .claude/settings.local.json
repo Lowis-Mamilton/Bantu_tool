@@ -9,7 +9,10 @@
       "Bash(node --check C:/LTP/CODE/Bantu_tool/_tmp_check.js)",
       "Bash(node -e \"const fs=require\\('fs'\\);const html=fs.readFileSync\\('index.html','utf8'\\);const m=html.match\\(/<script>\\([\\\\s\\\\S]*\\)<\\\\/script>/\\);require\\('fs'\\).writeFileSync\\('_tmp_check.js',m[1]\\);\")",
       "Bash(node --check _tmp_check.js)",
-      "Bash(rm _tmp_check.js)"
+      "Bash(rm _tmp_check.js)",
+      "Bash(gh api *)",
+      "Bash(node -e \"const fs=require\\('fs'\\);const html=fs.readFileSync\\('index.html','utf8'\\);const m=html.match\\(/<script>\\([\\\\s\\\\S]*?\\)<\\\\/script>\\(?![\\\\s\\\\S]*<script>\\)/\\);\")",
+      "Bash(grep -rn \"lowis-mamilton\" .)"
     ]
   }
 }

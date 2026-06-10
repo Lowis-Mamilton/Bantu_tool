@@ -8,7 +8,42 @@
 <meta name="apple-mobile-web-app-title" content="班圖">
 <link rel="apple-touch-icon" href="./icon/bantuicon.png">
 <link rel="manifest" href="manifest.json">
-<title>班圖 Bantu</title>
+<meta name="theme-color" content="#4F7CFF">
+<title>班圖 Bantu — 排班、工時與薪資管理</title>
+<meta name="description" content="班圖 Bantu 是一款免費的排班記錄 PWA，支援多份工作、固定班次範本、加班費與薪資估算、工時統計圖表，可安裝到手機桌面離線使用。">
+<meta name="keywords" content="排班表,班表,打卡,工時統計,薪資計算,兼職,PWA,shift schedule,work hours tracker,salary calculator">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://bantu.bantutw.workers.dev/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="班圖 Bantu — 排班、工時與薪資管理">
+<meta property="og:description" content="免費的排班記錄 PWA，支援多份工作、固定班次範本、加班費與薪資估算、工時統計圖表，可安裝到手機桌面離線使用。">
+<meta property="og:url" content="https://bantu.bantutw.workers.dev/">
+<meta property="og:image" content="https://bantu.bantutw.workers.dev/icon/bantuicon.png">
+<meta property="og:locale" content="zh_TW">
+<meta property="og:locale:alternate" content="en_US">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="班圖 Bantu — 排班、工時與薪資管理">
+<meta name="twitter:description" content="免費的排班記錄 PWA，支援多份工作、固定班次範本、加班費與薪資估算、工時統計圖表，可安裝到手機桌面離線使用。">
+<meta name="twitter:image" content="https://bantu.bantutw.workers.dev/icon/bantuicon.png">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "班圖 Bantu",
+  "alternateName": "Bantu",
+  "description": "免費的排班記錄 PWA，支援多份工作、固定班次範本、加班費與薪資估算、工時統計圖表，可安裝到手機桌面離線使用。",
+  "url": "https://bantu.bantutw.workers.dev/",
+  "applicationCategory": "BusinessApplication",
+  "operatingSystem": "iOS, Android, Web",
+  "inLanguage": ["zh-TW", "en"],
+  "image": "https://bantu.bantutw.workers.dev/icon/bantuicon.png",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  }
+}
+</script>
 <style>
 :root{
   --bg:#faf8f4;--card:#ffffff;--dark:#2a2620;
@@ -126,6 +161,13 @@ nav{position:fixed;bottom:0;left:0;right:0;height:calc(var(--nav-h) + var(--safe
 .mom-pos{color:#3f9d72}
 .mom-neg{color:#e05252}
 .mom-flat{color:var(--t3)}
+.install-banner{display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--bd);border-radius:var(--rs);padding:12px 14px;margin:14px 20px 0}
+.install-banner-icon{width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;background:#e0f2fe}
+.install-banner-body{flex:1;min-width:0}
+.install-banner-title{font-size:13px;font-weight:600}
+.install-banner-desc{font-size:12px;color:var(--t2);margin-top:2px}
+.install-banner-btn{background:var(--dark);color:#faf8f4;border:none;border-radius:8px;padding:7px 12px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;flex-shrink:0}
+.install-banner-close{background:none;border:none;color:var(--t3);cursor:pointer;font-size:18px;line-height:1;padding:4px;flex-shrink:0}
 .month-sel{display:flex;align-items:center;justify-content:center;gap:16px;padding:14px 20px 0}
 .month-sel-btn{width:30px;height:30px;border:1px solid var(--bd);background:var(--card);border-radius:8px;cursor:pointer;font-size:14px;color:var(--t2);display:flex;align-items:center;justify-content:center}
 .month-sel-lbl{font-size:16px;font-weight:600}
@@ -236,6 +278,15 @@ nav{position:fixed;bottom:0;left:0;right:0;height:calc(var(--nav-h) + var(--safe
     <button class="icon-btn" onclick="switchPage('settings')">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
     </button>
+  </div>
+  <div class="install-banner" id="install-banner" style="display:none">
+    <div class="install-banner-icon">📲</div>
+    <div class="install-banner-body">
+      <div class="install-banner-title" id="install-banner-title"></div>
+      <div class="install-banner-desc" id="install-banner-desc"></div>
+    </div>
+    <button class="install-banner-btn" id="install-banner-btn" style="display:none" onclick="installApp()"></button>
+    <button class="install-banner-close" onclick="dismissInstallBanner()" aria-label="Close">✕</button>
   </div>
   <div class="week-strip" id="week-strip"></div>
   <div id="today-card-wrap"></div>
@@ -539,6 +590,10 @@ const LANGS = {
     secData:'資料',
     setExport:'匯出資料（JSON）',setClear:'清除所有班次',
     version:'班圖 Bantu v2.0 · 多工作支援',
+    installTitle:'將班圖加入主畫面',
+    installDescIOS:'點擊下方分享按鈕，選擇「加入主畫面」',
+    installDescAndroid:'安裝後可離線使用，並從主畫面快速開啟',
+    installBtn:'安裝',
     modalAddShift:'＋ 新增班次',
     modalNoShifts:'尚無班次，點下方新增',
     modalNew:'新增班次',modalEdit:'編輯班次',
@@ -584,7 +639,7 @@ const LANGS = {
     goalDone:'🎉 Goal reached!',
     stHours:'Total Hours',stDays:'Days Worked',stShifts:'Total Shifts',stAvg:'Avg Daily Hrs',
     stBreakdown:'By Job',noMonthShifts:'No shifts this month',
-    momLbl:'vs Last Month',momHours:'Hours Change',momSalary:'Earnings Change',momNoData:'No data last month',
+    momLbl:'vs Last Month',momHours:'Hours Change',momSalary:'Earnings Change',
     catBreakdown:'Shift Type Breakdown',wdBreakdown:'Hours by Weekday',
     dUnit:'d',sUnit:'shifts',
     setTitle:'Settings',setSub:'Jobs & Pay',
@@ -603,6 +658,10 @@ const LANGS = {
     secData:'Data',
     setExport:'Export Data (JSON)',setClear:'Clear All Shifts',
     version:'Bantu v2.0 · Multi-job',
+    installTitle:'Add Bantu to Home Screen',
+    installDescIOS:'Tap the Share button below, then "Add to Home Screen"',
+    installDescAndroid:'Install for offline use and quick access',
+    installBtn:'Install',
     modalAddShift:'+ Add Shift',
     modalNoShifts:'No shifts yet — tap below to add',
     modalNew:'New Shift',modalEdit:'Edit Shift',
@@ -789,6 +848,7 @@ function applyLang(){
   document.getElementById('btn-save').textContent=L().btnSave;
   document.getElementById('btn-prev-day').textContent=L().btnPrev;
   document.getElementById('btn-next-day').textContent=L().btnNext;
+  renderInstallBanner();
 }
 
 // ── Navigation ──
@@ -1348,6 +1408,49 @@ function refreshAll(){
   if(currentPage==='today') renderToday();
   if(currentPage==='calendar') renderCalendar();
   if(currentPage==='stats') renderStats();
+}
+
+// ── PWA Install ──
+let deferredInstallPrompt=null;
+function isStandalone(){return window.matchMedia('(display-mode: standalone)').matches||window.navigator.standalone===true}
+function isIOS(){return /iphone|ipad|ipod/i.test(navigator.userAgent)}
+window.addEventListener('beforeinstallprompt',e=>{
+  e.preventDefault();
+  deferredInstallPrompt=e;
+  renderInstallBanner();
+});
+window.addEventListener('appinstalled',()=>{
+  deferredInstallPrompt=null;
+  localStorage.setItem('bantu_install_dismissed','1');
+  document.getElementById('install-banner').style.display='none';
+});
+function renderInstallBanner(){
+  const banner=document.getElementById('install-banner');
+  if(isStandalone()||localStorage.getItem('bantu_install_dismissed')){banner.style.display='none';return}
+  const btn=document.getElementById('install-banner-btn');
+  if(isIOS()){
+    document.getElementById('install-banner-title').textContent=L().installTitle;
+    document.getElementById('install-banner-desc').textContent=L().installDescIOS;
+    btn.style.display='none';
+    banner.style.display='flex';
+  } else if(deferredInstallPrompt){
+    document.getElementById('install-banner-title').textContent=L().installTitle;
+    document.getElementById('install-banner-desc').textContent=L().installDescAndroid;
+    btn.textContent=L().installBtn;
+    btn.style.display='';
+    banner.style.display='flex';
+  } else {
+    banner.style.display='none';
+  }
+}
+function installApp(){
+  if(!deferredInstallPrompt) return;
+  deferredInstallPrompt.prompt();
+  deferredInstallPrompt.userChoice.finally(()=>{deferredInstallPrompt=null;renderInstallBanner()});
+}
+function dismissInstallBanner(){
+  localStorage.setItem('bantu_install_dismissed','1');
+  document.getElementById('install-banner').style.display='none';
 }
 
 // ── Init ──

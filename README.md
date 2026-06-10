@@ -2,6 +2,8 @@
 
 > A PWA for shift scheduling, hours tracking, and salary estimation
 
+🔗 **Live app:** https://bantu.bantutw.workers.dev/
+
 ![Bantu Icon](./icon/bantuicon.png)
 
 ## Features
@@ -31,6 +33,8 @@ Bantu_tool/
 ├── index.html      # Main app (single-file PWA, pure HTML/CSS/JS)
 ├── manifest.json   # PWA manifest
 ├── sw.js           # Service worker (offline cache)
+├── robots.txt      # SEO crawler rules
+├── sitemap.xml     # SEO sitemap
 ├── icon/
 │   └── bantuicon.png
 └── README.md
