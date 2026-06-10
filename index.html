@@ -91,6 +91,13 @@ nav{position:fixed;bottom:0;left:0;right:0;height:calc(var(--nav-h) + var(--safe
 .salary-lbl{font-size:12px;color:#b5ac9f;margin-bottom:4px;font-weight:500}
 .salary-val{font-size:36px;font-weight:800;letter-spacing:-.03em}
 .salary-det{font-size:12px;color:#c9c0b3;margin-top:4px}
+.goal-card{background:var(--card);border:1px solid var(--bd);border-radius:var(--r);padding:16px 20px;margin:10px 20px 0}
+.goal-header{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px}
+.goal-lbl{font-size:13px;font-weight:600}
+.goal-pct{font-size:13px;font-weight:700;color:var(--dark)}
+.goal-track{background:var(--day-empty);border-radius:8px;height:8px;overflow:hidden}
+.goal-fill{background:var(--dark);height:100%;border-radius:8px;transition:width .3s ease}
+.goal-det{display:flex;justify-content:space-between;font-size:12px;color:var(--t2);margin-top:8px}
 .stats-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:10px 20px 0}
 .stat-card{background:var(--card);border:1px solid var(--bd);border-radius:var(--rs);padding:16px 14px}
 .stat-icon{width:32px;height:32px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:15px;margin-bottom:8px}
@@ -103,6 +110,22 @@ nav{position:fixed;bottom:0;left:0;right:0;height:calc(var(--nav-h) + var(--safe
 .bd-name{flex:1;font-size:14px;font-weight:500}
 .bd-cnt{font-size:13px;color:var(--t2)}
 .bd-hrs{font-size:14px;font-weight:600}
+.cat-item{display:flex;align-items:center;padding:11px 0;gap:10px;border-bottom:1px solid var(--bd)}
+.cat-item:last-child{border-bottom:none}
+.cat-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.cat-name{font-size:13px;font-weight:600;width:48px;flex-shrink:0}
+.cat-track{flex:1;height:8px;background:var(--day-empty);border-radius:4px;overflow:hidden}
+.cat-fill{height:100%;border-radius:4px;transition:width .3s ease}
+.cat-count{font-size:12px;color:var(--t2);min-width:64px;text-align:right;flex-shrink:0}
+.wd-chart{display:flex;justify-content:space-between;gap:4px;padding:16px 12px 12px}
+.wd-col{display:flex;flex-direction:column;align-items:center;flex:1;gap:6px}
+.wd-val{font-size:10px;color:var(--t2);height:12px}
+.wd-track{height:70px;width:100%;display:flex;align-items:flex-end;justify-content:center}
+.wd-bar{width:18px;border-radius:5px 5px 2px 2px;background:var(--dark);min-height:3px;transition:height .3s ease}
+.wd-lbl{font-size:11px;color:var(--t3);font-weight:600}
+.mom-pos{color:#3f9d72}
+.mom-neg{color:#e05252}
+.mom-flat{color:var(--t3)}
 .month-sel{display:flex;align-items:center;justify-content:center;gap:16px;padding:14px 20px 0}
 .month-sel-btn{width:30px;height:30px;border:1px solid var(--bd);background:var(--card);border-radius:8px;cursor:pointer;font-size:14px;color:var(--t2);display:flex;align-items:center;justify-content:center}
 .month-sel-lbl{font-size:16px;font-weight:600}
@@ -252,6 +275,17 @@ nav{position:fixed;bottom:0;left:0;right:0;height:calc(var(--nav-h) + var(--safe
     <div class="salary-val" id="salary-val">NT$ 0</div>
     <div class="salary-det" id="salary-det"></div>
   </div>
+  <div class="goal-card" id="goal-card" style="display:none">
+    <div class="goal-header">
+      <div class="goal-lbl" id="goal-lbl">本月目標進度</div>
+      <div class="goal-pct" id="goal-pct">0%</div>
+    </div>
+    <div class="goal-track"><div class="goal-fill" id="goal-fill" style="width:0%"></div></div>
+    <div class="goal-det">
+      <span id="goal-worked"></span>
+      <span id="goal-remain"></span>
+    </div>
+  </div>
   <div class="stats-row">
     <div class="stat-card"><div class="stat-icon" style="background:#eaf3ef">⏱️</div><div class="stat-value" id="stat-hours">0</div><div class="stat-label" id="st-lbl-hours">總工時（小時）</div></div>
     <div class="stat-card"><div class="stat-icon" style="background:#fbf2e3">📅</div><div class="stat-value" id="stat-days">0</div><div class="stat-label" id="st-lbl-days">出勤天數</div></div>
@@ -262,6 +296,15 @@ nav{position:fixed;bottom:0;left:0;right:0;height:calc(var(--nav-h) + var(--safe
   </div>
   <div class="sec-label" id="st-breakdown-lbl">工作別統計</div>
   <div class="card"><div id="breakdown-list"></div></div>
+  <div class="sec-label" id="st-mom-lbl">與上月比較</div>
+  <div class="stats-row">
+    <div class="stat-card"><div class="stat-icon" style="background:#eaf3ef">📈</div><div class="stat-value" id="mom-hours-val">—</div><div class="stat-label" id="st-lbl-mom-hours">工時變化</div></div>
+    <div class="stat-card"><div class="stat-icon" style="background:#fbf2e3">💵</div><div class="stat-value" id="mom-salary-val">—</div><div class="stat-label" id="st-lbl-mom-salary">薪資變化</div></div>
+  </div>
+  <div class="sec-label" id="st-cat-lbl">班別分布</div>
+  <div class="card"><div id="cat-breakdown"></div></div>
+  <div class="sec-label" id="st-wd-lbl">星期工時分布</div>
+  <div class="card"><div class="wd-chart" id="wd-chart"></div></div>
 </div>
 
 <!-- SETTINGS -->
@@ -347,7 +390,8 @@ nav{position:fixed;bottom:0;left:0;right:0;height:calc(var(--nav-h) + var(--safe
     <!-- Pay -->
     <div class="sec-label" id="set-sec-pay-lbl">預設薪資設定</div>
     <div class="set-group">
-      <div class="set-row"><div class="set-icon" style="background:#eaf3ef">💰</div><div class="set-lbl" id="set-lbl-hourly">預設時薪</div><input type="number" class="set-input" id="set-hourly" min="0" step="1"><span class="set-val">NT$/hr</span></div>
+      <div class="set-row"><div class="set-icon" style="background:#fdf0e6">💱</div><div class="set-lbl" id="set-lbl-currency">幣別</div><select class="set-input" id="set-currency" style="width:160px"></select></div>
+      <div class="set-row"><div class="set-icon" style="background:#eaf3ef">💰</div><div class="set-lbl" id="set-lbl-hourly">預設時薪</div><input type="number" class="set-input" id="set-hourly" min="0" step="1"><span class="set-val" id="set-val-hourly-unit">NT$/hr</span></div>
       <div class="set-row"><div class="set-icon" style="background:#fbf2e3">🍽️</div><div class="set-lbl" id="set-lbl-break">休息扣除</div><input type="number" class="set-input" id="set-break" min="0" step="15" style="width:70px"><span class="set-val" id="set-val-break">分鐘</span></div>
       <div class="set-row"><div class="set-icon" style="background:#ecebf5">📊</div><div class="set-lbl" id="set-lbl-ot">加班費率</div><input type="number" class="set-input" id="set-ot" min="1" step="0.01" style="width:80px"><span class="set-val" id="set-val-ot">倍</span></div>
       <div class="set-row"><div class="set-icon" style="background:#f0ebe0">⏰</div><div class="set-lbl" id="set-lbl-std">每日標準工時</div><input type="number" class="set-input" id="set-std" min="1" step="0.5" style="width:70px"><span class="set-val" id="set-val-std">小時</span></div>
@@ -470,8 +514,14 @@ const LANGS = {
     stTitle:'統計',stSub:'月份報表',
     salLbl:'估算薪資（合計）',
     salDet:(d,s,h)=>`${d} 天 · ${s} 班次 · ${h} 小時`,
+    goalLbl:'本月目標進度',
+    goalWorked:(h,g)=>`已工作 ${h} / ${g} 小時`,
+    goalRemain:h=>`還差 ${h} 小時達標`,
+    goalDone:'🎉 已達成本月目標',
     stHours:'總工時（小時）',stDays:'出勤天數',stShifts:'班次總數',stAvg:'日均工時',
     stBreakdown:'工作別統計',noMonthShifts:'本月尚無班次紀錄',
+    momLbl:'與上月比較',momHours:'工時變化',momSalary:'薪資變化',
+    catBreakdown:'班別分布',wdBreakdown:'星期工時分布',
     dUnit:'天',sUnit:'班',
     setTitle:'設定',setSub:'工作與薪資管理',
     secLang:'語言',langLbl:'語言 / Language',
@@ -481,10 +531,11 @@ const LANGS = {
     jfCancel:'取消',jfAdd:'新增工作',jfSave:'儲存',
     jfRate:'時薪',jfRatePh:'留空套用預設時薪',
     secPay:'預設薪資設定',
+    setCurrency:'幣別',
     setHourly:'預設時薪',setBreak:'休息扣除',setBreakUnit:'分鐘',
     setOt:'加班費率',setOtUnit:'倍',
     setStd:'每日標準工時',setStdUnit:'小時',
-    setDeduction:'月固定扣款',setDeductionUnit:'NT$',salDeductLbl:'扣款',
+    setDeduction:'月固定扣款',salDeductLbl:'扣款',
     secData:'資料',
     setExport:'匯出資料（JSON）',setClear:'清除所有班次',
     version:'班圖 Bantu v2.0 · 多工作支援',
@@ -527,8 +578,14 @@ const LANGS = {
     stTitle:'Stats',stSub:'Monthly Report',
     salLbl:'Est. Earnings',
     salDet:(d,s,h)=>`${d} days · ${s} shifts · ${h} hrs`,
+    goalLbl:'Monthly Goal Progress',
+    goalWorked:(h,g)=>`Worked ${h} / ${g} hrs`,
+    goalRemain:h=>`${h} hrs to goal`,
+    goalDone:'🎉 Goal reached!',
     stHours:'Total Hours',stDays:'Days Worked',stShifts:'Total Shifts',stAvg:'Avg Daily Hrs',
     stBreakdown:'By Job',noMonthShifts:'No shifts this month',
+    momLbl:'vs Last Month',momHours:'Hours Change',momSalary:'Earnings Change',momNoData:'No data last month',
+    catBreakdown:'Shift Type Breakdown',wdBreakdown:'Hours by Weekday',
     dUnit:'d',sUnit:'shifts',
     setTitle:'Settings',setSub:'Jobs & Pay',
     secLang:'Language',langLbl:'語言 / Language',
@@ -538,10 +595,11 @@ const LANGS = {
     jfCancel:'Cancel',jfAdd:'Add Job',jfSave:'Save',
     jfRate:'Hourly Rate',jfRatePh:'Leave blank to use default',
     secPay:'Default Pay',
+    setCurrency:'Currency',
     setHourly:'Hourly Rate',setBreak:'Break Deduction',setBreakUnit:'min',
     setOt:'OT Rate',setOtUnit:'x',
     setStd:'Standard Daily Hrs',setStdUnit:'hrs',
-    setDeduction:'Monthly Deductions',setDeductionUnit:'NT$',salDeductLbl:'deduct',
+    setDeduction:'Monthly Deductions',salDeductLbl:'deduct',
     secData:'Data',
     setExport:'Export Data (JSON)',setClear:'Clear All Shifts',
     version:'Bantu v2.0 · Multi-job',
@@ -567,9 +625,23 @@ const LANGS = {
 
 // ── Config & State ──
 const JOB_PALETTE=['#3f9d72','#d9a23f','#6b62c4','#e05252','#0891b2','#f97316','#8b5cf6','#ec4899','#2563eb','#0d9488'];
+const CAT_COLORS=['#d9a23f','#0891b2','#6b62c4'];
+
+const CURRENCIES=[
+  {code:'TWD',symbol:'NT$',zh:'新台幣',en:'Taiwan Dollar'},
+  {code:'USD',symbol:'$',zh:'美元',en:'US Dollar'},
+  {code:'JPY',symbol:'¥',zh:'日圓',en:'Japanese Yen'},
+  {code:'CNY',symbol:'¥',zh:'人民幣',en:'Chinese Yuan'},
+  {code:'EUR',symbol:'€',zh:'歐元',en:'Euro'},
+  {code:'GBP',symbol:'£',zh:'英鎊',en:'British Pound'},
+  {code:'HKD',symbol:'HK$',zh:'港幣',en:'Hong Kong Dollar'},
+  {code:'KRW',symbol:'₩',zh:'韓元',en:'Korean Won'},
+  {code:'AUD',symbol:'A$',zh:'澳幣',en:'Australian Dollar'},
+  {code:'CAD',symbol:'C$',zh:'加幣',en:'Canadian Dollar'},
+];
 
 const DEFAULT_CFG={
-  lang:'zh',defaultRate:200,breakMinutes:0,otRate:1.34,stdHours:8,deduction:758,
+  lang:'zh',currency:'TWD',defaultRate:200,breakMinutes:0,otRate:1.34,stdHours:8,deduction:758,
   jobs:[
     {id:'j1',name:'工作1',color:'#3f9d72',hourlyRate:null},
     {id:'j2',name:'工作2',color:'#d9a23f',hourlyRate:null},
@@ -594,6 +666,7 @@ let cfg={...DEFAULT_CFG,...ld(CK,{})};
 if(!Array.isArray(cfg.jobs)||!cfg.jobs.length) cfg.jobs=DEFAULT_CFG.jobs;
 if(!Array.isArray(cfg.templates)) cfg.templates=[];
 if(!cfg.lang) cfg.lang='zh';
+if(!CURRENCIES.find(c=>c.code===cfg.currency)) cfg.currency='TWD';
 
 let lang=cfg.lang;
 const L=()=>LANGS[lang];
@@ -613,16 +686,21 @@ function calcH(s,e,brk=0){
 }
 function fmtH(h){const hh=Math.floor(h),mm=Math.round((h-hh)*60);return L().hShort(hh,mm)}
 function fmtHFull(h){const hh=Math.floor(h),mm=Math.round((h-hh)*60);return L().hFull(hh,mm)}
+function autoClassIndex(start){
+  if(!start) return 0;
+  const[h,m]=start.split(':').map(Number),mins=h*60+m;
+  if(mins<630) return 0;
+  if(mins<870) return 1;
+  return 2;
+}
 function autoClassLabel(start){
   if(!start) return '';
-  const[h,m]=start.split(':').map(Number),mins=h*60+m;
-  if(mins<630) return L().cat[0];
-  if(mins<870) return L().cat[1];
-  return L().cat[2];
+  return L().cat[autoClassIndex(start)];
 }
 
 function getJob(id){return cfg.jobs.find(j=>j.id===id)||cfg.jobs[0]}
 function jobRate(j){return(j.hourlyRate!=null?j.hourlyRate:cfg.defaultRate)||0}
+function curSym(){return(CURRENCIES.find(c=>c.code===cfg.currency)||CURRENCIES[0]).symbol}
 function hex2light(hex,t){
   try{const r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);
   return`rgb(${Math.round(r+(255-r)*t)},${Math.round(g+(255-g)*t)},${Math.round(b+(255-b)*t)})`}
@@ -652,11 +730,17 @@ function applyLang(){
   document.getElementById('st-title').textContent=L().stTitle;
   document.getElementById('st-sub').textContent=L().stSub;
   document.getElementById('st-salary-lbl').textContent=L().salLbl;
+  document.getElementById('goal-lbl').textContent=L().goalLbl;
   document.getElementById('st-lbl-hours').textContent=L().stHours;
   document.getElementById('st-lbl-days').textContent=L().stDays;
   document.getElementById('st-lbl-shifts').textContent=L().stShifts;
   document.getElementById('st-lbl-avg').textContent=L().stAvg;
   document.getElementById('st-breakdown-lbl').textContent=L().stBreakdown;
+  document.getElementById('st-mom-lbl').textContent=L().momLbl;
+  document.getElementById('st-lbl-mom-hours').textContent=L().momHours;
+  document.getElementById('st-lbl-mom-salary').textContent=L().momSalary;
+  document.getElementById('st-cat-lbl').textContent=L().catBreakdown;
+  document.getElementById('st-wd-lbl').textContent=L().wdBreakdown;
   // Settings labels
   document.getElementById('set-title').textContent=L().setTitle;
   document.getElementById('set-sub').textContent=L().setSub;
@@ -679,6 +763,9 @@ function applyLang(){
   document.getElementById('tf-note-lbl').textContent=L().tfNote;
   document.getElementById('tfb-cancel').textContent=L().tfCancel;
   document.getElementById('set-sec-pay-lbl').textContent=L().secPay;
+  document.getElementById('set-lbl-currency').textContent=L().setCurrency;
+  renderCurrencyOptions();
+  updateCurrencyUI();
   document.getElementById('set-lbl-hourly').textContent=L().setHourly;
   document.getElementById('set-lbl-break').textContent=L().setBreak;
   document.getElementById('set-val-break').textContent=L().setBreakUnit;
@@ -687,7 +774,6 @@ function applyLang(){
   document.getElementById('set-lbl-std').textContent=L().setStd;
   document.getElementById('set-val-std').textContent=L().setStdUnit;
   document.getElementById('set-lbl-deduction').textContent=L().setDeduction;
-  document.getElementById('set-val-deduction-unit').textContent=L().setDeductionUnit;
   document.getElementById('set-sec-data-lbl').textContent=L().secData;
   document.getElementById('set-lbl-export').textContent=L().setExport;
   document.getElementById('set-lbl-clear').textContent=L().setClear;
@@ -849,38 +935,124 @@ let statY=new Date().getFullYear(),statM=new Date().getMonth();
 document.getElementById('stat-prev').onclick=()=>{statM--;if(statM<0){statM=11;statY--}renderStats()};
 document.getElementById('stat-next').onclick=()=>{statM++;if(statM>11){statM=0;statY++}renderStats()};
 
+function computeMonthStats(y,m){
+  const entries=Object.entries(shifts).filter(([k])=>{const d=pKey(k);return d.getFullYear()===y&&d.getMonth()===m});
+  let totalH=0,workedH=0,sc=0,salary=0;const byJob={},catCounts=[0,0,0],wdHours=[0,0,0,0,0,0,0],tok=tKey();
+  entries.forEach(([k,ds])=>{
+    const dow=pKey(k).getDay();
+    ds.forEach(s=>{
+      const hrs=calcH(s.start,s.end,cfg.breakMinutes),job=getJob(s.jobId),rate=jobRate(job),std=cfg.stdHours||8,ot=cfg.otRate||1.34;
+      const pay=hrs<=std?hrs*rate:std*rate+(hrs-std)*rate*ot;
+      totalH+=hrs;sc++;salary+=pay;
+      if(k<=tok) workedH+=hrs;
+      wdHours[dow]+=hrs;
+      catCounts[autoClassIndex(s.start)]++;
+      if(!byJob[s.jobId]) byJob[s.jobId]={hours:0,count:0,pay:0};
+      byJob[s.jobId].hours+=hrs;byJob[s.jobId].count++;byJob[s.jobId].pay+=pay;
+    });
+  });
+  return{totalH,workedH,sc,salary,byJob,days:entries.length,catCounts,wdHours};
+}
+
 function renderStats(){
   document.getElementById('stat-month-lbl').textContent=`${statY} ${L().mon[statM]}`;
-  const entries=Object.entries(shifts).filter(([k])=>{const d=pKey(k);return d.getFullYear()===statY&&d.getMonth()===statM});
-  let totalH=0,sc=0,salary=0;const byJob={};
-  entries.forEach(([,ds])=>ds.forEach(s=>{
-    const hrs=calcH(s.start,s.end,cfg.breakMinutes),job=getJob(s.jobId),rate=jobRate(job),std=cfg.stdHours||8,ot=cfg.otRate||1.34;
-    const pay=hrs<=std?hrs*rate:std*rate+(hrs-std)*rate*ot;
-    totalH+=hrs;sc++;salary+=pay;
-    if(!byJob[s.jobId]) byJob[s.jobId]={hours:0,count:0,pay:0};
-    byJob[s.jobId].hours+=hrs;byJob[s.jobId].count++;byJob[s.jobId].pay+=pay;
-  }));
-  const days=entries.length,avg=days?totalH/days:0;
+  const cur=computeMonthStats(statY,statM);
+  const{totalH,workedH,sc,salary,byJob,days,catCounts,wdHours}=cur;
+  const avg=days?totalH/days:0;
   const deduction=cfg.deduction||0;
   const net=Math.max(0,Math.round(salary)-deduction);
-  document.getElementById('salary-val').textContent=`NT$ ${net.toLocaleString()}`;
-  const deductStr=deduction>0?` · ${t('salDeductLbl')} NT$${deduction.toLocaleString()}`:'';
+  document.getElementById('salary-val').textContent=`${curSym()} ${net.toLocaleString()}`;
+  const deductStr=deduction>0?` · ${t('salDeductLbl')} ${curSym()}${deduction.toLocaleString()}`:'';
   document.getElementById('salary-det').textContent=L().salDet(days,sc,totalH.toFixed(1))+deductStr;
+  const goal=totalH,goalCard=document.getElementById('goal-card');
+  if(goal>0){
+    goalCard.style.display='';
+    const pct=Math.min(100,(workedH/goal)*100);
+    document.getElementById('goal-fill').style.width=pct.toFixed(1)+'%';
+    document.getElementById('goal-pct').textContent=Math.round(pct)+'%';
+    document.getElementById('goal-worked').textContent=L().goalWorked(workedH.toFixed(1),goal.toFixed(1));
+    const remain=goal-workedH;
+    document.getElementById('goal-remain').textContent=remain>0?L().goalRemain(remain.toFixed(1)):L().goalDone;
+  } else {
+    goalCard.style.display='none';
+  }
   document.getElementById('stat-hours').textContent=totalH.toFixed(1);
   document.getElementById('stat-days').textContent=days;
   document.getElementById('stat-shifts').textContent=sc;
   document.getElementById('stat-avg').textContent=avg.toFixed(1);
   const bl=document.getElementById('breakdown-list');bl.innerHTML='';
-  if(!Object.keys(byJob).length){bl.innerHTML=`<div style="padding:20px;text-align:center;color:var(--t3);font-size:14px">${L().noMonthShifts}</div>`;return}
-  Object.entries(byJob).sort(([,a],[,b])=>b.hours-a.hours).forEach(([jid,data])=>{
-    const job=getJob(jid);const el=document.createElement('div');el.className='bd-item';
-    el.innerHTML=`<div class="bd-dot" style="background:${job.color}"></div><div class="bd-name">${job.name}</div><div class="bd-cnt" style="margin-right:10px">${data.count} ${L().sUnit}</div><div class="bd-hrs" style="margin-right:12px;color:${job.color}">${data.hours.toFixed(1)}h</div><div class="bd-hrs" style="font-size:12px;color:var(--t2)">NT$${Math.round(data.pay).toLocaleString()}</div>`;
-    bl.appendChild(el);
+  if(!Object.keys(byJob).length){
+    bl.innerHTML=`<div style="padding:20px;text-align:center;color:var(--t3);font-size:14px">${L().noMonthShifts}</div>`;
+  } else {
+    Object.entries(byJob).sort(([,a],[,b])=>b.hours-a.hours).forEach(([jid,data])=>{
+      const job=getJob(jid);const el=document.createElement('div');el.className='bd-item';
+      el.innerHTML=`<div class="bd-dot" style="background:${job.color}"></div><div class="bd-name">${job.name}</div><div class="bd-cnt" style="margin-right:10px">${data.count} ${L().sUnit}</div><div class="bd-hrs" style="margin-right:12px;color:${job.color}">${data.hours.toFixed(1)}h</div><div class="bd-hrs" style="font-size:12px;color:var(--t2)">${curSym()}${Math.round(data.pay).toLocaleString()}</div>`;
+      bl.appendChild(el);
+    });
+  }
+  renderCatBreakdown(catCounts,sc);
+  renderWeekdayChart(wdHours);
+  let pm=statM-1,py=statY;if(pm<0){pm=11;py--}
+  renderMomComparison(cur,computeMonthStats(py,pm));
+}
+
+function renderCatBreakdown(catCounts,total){
+  const wrap=document.getElementById('cat-breakdown');wrap.innerHTML='';
+  if(!total){wrap.innerHTML=`<div style="padding:20px;text-align:center;color:var(--t3);font-size:14px">${L().noMonthShifts}</div>`;return}
+  catCounts.forEach((c,i)=>{
+    const pct=Math.round(c/total*100);
+    const el=document.createElement('div');el.className='cat-item';
+    el.innerHTML=`<span class="cat-dot" style="background:${CAT_COLORS[i]}"></span><span class="cat-name">${L().cat[i]}</span><div class="cat-track"><div class="cat-fill" style="width:${pct}%;background:${CAT_COLORS[i]}"></div></div><span class="cat-count">${c} ${L().sUnit} · ${pct}%</span>`;
+    wrap.appendChild(el);
   });
 }
 
+function renderWeekdayChart(wdHours){
+  const wrap=document.getElementById('wd-chart');wrap.innerHTML='';
+  const maxH=Math.max(...wdHours,0.01);
+  wdHours.forEach((h,i)=>{
+    const pct=Math.round((h/maxH)*100);
+    const barColor=i===0?'rgba(192,57,43,.6)':i===6?'rgba(91,130,216,.7)':'var(--dark)';
+    const col=document.createElement('div');col.className='wd-col';
+    col.innerHTML=`<span class="wd-val">${h>0?h.toFixed(1):''}</span><div class="wd-track"><div class="wd-bar" style="height:${pct}%;background:${barColor}"></div></div><span class="wd-lbl">${L().wd[i]}</span>`;
+    wrap.appendChild(col);
+  });
+}
+
+function renderMomComparison(cur,prev){
+  const hVal=document.getElementById('mom-hours-val'),sVal=document.getElementById('mom-salary-val');
+  if(!prev.days){
+    hVal.textContent='—';sVal.textContent='—';
+    hVal.className='stat-value';sVal.className='stat-value';
+    return;
+  }
+  const hDelta=cur.totalH-prev.totalH,sDelta=Math.round(cur.salary-prev.salary);
+  const hCls=hDelta>0?'mom-pos':hDelta<0?'mom-neg':'mom-flat';
+  const sCls=sDelta>0?'mom-pos':sDelta<0?'mom-neg':'mom-flat';
+  hVal.textContent=`${hDelta>0?'+':''}${hDelta.toFixed(1)}h`;
+  sVal.textContent=`${sDelta>0?'+':''}${curSym()}${sDelta.toLocaleString()}`;
+  hVal.className='stat-value '+hCls;
+  sVal.className='stat-value '+sCls;
+}
+
 // ── Settings ──
+function renderCurrencyOptions(){
+  const sel=document.getElementById('set-currency');
+  sel.innerHTML=CURRENCIES.map(c=>`<option value="${c.code}">${c.symbol} ${c.code} · ${lang==='zh'?c.zh:c.en}</option>`).join('');
+  sel.value=cfg.currency;
+}
+function updateCurrencyUI(){
+  const sym=curSym();
+  document.getElementById('set-val-hourly-unit').textContent=`${sym}/hr`;
+  document.getElementById('set-val-deduction-unit').textContent=sym;
+}
 function renderSettings(){
+  document.getElementById('set-currency').onchange=()=>{
+    cfg.currency=document.getElementById('set-currency').value;
+    sv(CK,cfg);
+    updateCurrencyUI();
+    renderJobTags();
+  };
   document.getElementById('set-hourly').value=cfg.defaultRate??'';
   document.getElementById('set-break').value=cfg.breakMinutes??0;
   document.getElementById('set-ot').value=cfg.otRate??1.34;
@@ -906,7 +1078,7 @@ function renderJobTags(){
     const bg=hex2light(j.color,.85),bd=hex2light(j.color,.65);
     const el=document.createElement('div');el.className='job-tag';
     el.style.cssText=`background:${bg};border-color:${bd};color:${j.color}`;
-    const rateLabel=j.hourlyRate!=null?` · $${j.hourlyRate}/h`:'';
+    const rateLabel=j.hourlyRate!=null?` · ${curSym()}${j.hourlyRate}/h`:'';
     el.innerHTML=`<div class="dot" style="background:${j.color}"></div>${j.name}<span style="font-size:11px;opacity:.7">${rateLabel}</span><button class="job-tag-edit" title="${t('jfSave')}" onclick="openJobForm('${j.id}');event.stopPropagation()">✏️</button><button class="job-tag-del" onclick="deleteJob('${j.id}');event.stopPropagation()">✕</button>`;
     wrap.appendChild(el);
   });

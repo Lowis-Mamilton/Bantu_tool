@@ -1,4 +1,4 @@
-const CACHE = 'bantu-v2';
+const CACHE = 'bantu-v3';
 const ASSETS = ['./index.html', './manifest.json', './icon/bantuicon.png'];
 
 self.addEventListener('install', e => {

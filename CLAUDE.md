@@ -1,82 +1,108 @@
-# 班圖 Bantu — Claude 專案說明
+# Bantu (班圖) — Claude Project Notes
 
-## 專案概述
+## Overview
 
-班圖（Bantu）是一個以純 Vanilla HTML/CSS/JavaScript 寫成的單檔 PWA 排班應用程式，目標裝置為 iPhone，支援加入主畫面離線使用。所有功能集中在 `index.html` 一個檔案中。
+Bantu is a single-file PWA shift-scheduling app written in pure vanilla HTML/CSS/JavaScript, targeting iPhone with offline home-screen support. All functionality lives in one file: `index.html`.
 
-## 檔案結構
+## File Structure
 
 ```
-index.html      主程式（~1000 行，含所有 CSS/JS）
-manifest.json   PWA manifest（名稱、icon、顯示模式）
-sw.js           Service Worker（快取版本：bantu-v2）
+index.html      Main app (~1100+ lines, all CSS/JS included)
+manifest.json   PWA manifest (name, icon, display mode)
+sw.js           Service worker (cache version: bantu-v3)
 icon/
-  bantuicon.png 應用程式 icon（2362×2362 PNG）
+  bantuicon.png App icon (2362×2362 PNG)
 ```
 
-## 資料結構
+## Data Structures
 
 ### Storage keys
-- `bantu_shifts_v3` — 班次資料
-- `bantu_cfg_v3` — 設定（工作、薪資、語言）
+- `bantu_shifts_v3` — shift data
+- `bantu_cfg_v3` — config (jobs, pay, language, templates)
 
-### Shifts 格式（v3）
+### Shifts format (v3)
 ```js
 shifts["2026-06-07"] = [
   { id: "uuid", jobId: "j1", start: "09:00", end: "17:00", note: "" }
 ]
 ```
 
-### Config 格式
+### Config format
 ```js
 cfg = {
   lang: 'zh',           // 'zh' | 'en'
-  defaultRate: 200,     // 預設時薪（當 job.hourlyRate 為 null 時使用）
+  currency: 'TWD',      // currency code, one of CURRENCIES (10 options)
+  defaultRate: 200,     // default hourly rate (used when job.hourlyRate is null)
   breakMinutes: 0,
   otRate: 1.34,
   stdHours: 8,
+  deduction: 758,       // fixed monthly deduction subtracted from estimated salary
   jobs: [
     { id: 'j1', name: '工作1', color: '#3f9d72', hourlyRate: null },
+  ],
+  templates: [
+    { id: 'tpl1', name: '早班', jobId: 'j1', start: '09:00', end: '17:00', note: '' }
   ]
 }
 ```
 
-## 核心架構
+## Core Architecture
 
 ### i18n
-- `LANGS.zh` / `LANGS.en` 兩個翻譯物件，含所有 UI 字串
-- `L()` 回傳目前語言物件，`t(key)` 取特定字串
-- `setLang(l)` 切換語言並重繪目前頁面
-- `applyLang()` 更新所有帶有固定 ID 的靜態 DOM 元素
+- `LANGS.zh` / `LANGS.en` — translation objects containing all UI strings
+- `L()` returns the current language object, `t(key)` returns a specific string
+- `setLang(l)` switches language and re-renders the current page
+- `applyLang()` updates all static DOM elements that have fixed IDs
 
-### 薪資計算
-- `jobRate(job)` — 若 `job.hourlyRate != null` 使用個別時薪，否則用 `cfg.defaultRate`
-- 加班計算：前 `stdHours` 小時按正常費率，超出部分乘以 `otRate`
+### Salary calculation
+- `jobRate(job)` — uses `job.hourlyRate` if set, otherwise falls back to `cfg.defaultRate`
+- Overtime: hours up to `stdHours` are paid at the normal rate; hours beyond that are multiplied by `otRate`
+- `cfg.deduction` is subtracted from the monthly total in the Stats page (net salary, floored at 0)
 
-### Modal 二層結構
-- `#modal-day-view` — 顯示該日所有班次 + 新增按鈕
-- `#modal-edit-view` — 新增/編輯單一班次表單
-- 若當天無班次，`openDayModal()` 直接進入 edit view
+### Currency
+- `CURRENCIES` — fixed list of 10 common currencies (`{code, symbol, zh, en}`), selectable in Settings
+- `curSym()` returns the symbol for `cfg.currency`, used everywhere a price is displayed (stats, job hourly-rate tags, settings units)
 
-### 班別自動分類（`autoClassLabel`）
-- 開始時間 < 10:30 → 早班
-- 10:30–14:29 → 中班
-- >= 14:30 → 晚班
+### Monthly goal progress
+- The goal-progress card on the Stats page (`#goal-card`) is fully derived from the user's own shift schedule — there is no manual goal setting
+- `goal` = total scheduled hours for the displayed month (sum of all shift hours); `worked` = sum of hours for shifts on or before today (`k<=tKey()`)
+- Shown only when `goal > 0`; displays a progress bar (`worked / goal`), percentage, and either remaining hours (future shifts this month) or a "goal reached" message
 
-## 設計規範
+### Two-layer modal
+- `#modal-day-view` — lists all shifts for the selected day + "Add Shift" button
+- `#modal-edit-view` — form for adding/editing a single shift
+- If the day has no shifts, `openDayModal()` jumps straight to the edit view
 
-### CSS 色彩 Token
+### Shift templates (固定班次)
+- Managed in Settings under "Shift Templates" — each template stores name, jobId, start, end, note
+- In the edit modal, a "Quick Apply" chip row (`renderQuickApply()`) appears above the job picker when templates exist; tapping a chip fills in job/start/end/note via `applyTemplate()`
+
+### Auto shift classification (`autoClassIndex` / `autoClassLabel`)
+- `autoClassIndex(start)` returns 0/1/2; `autoClassLabel(start)` maps that to `L().cat[i]`
+- Start time < 10:30 → Morning (早班, index 0)
+- 10:30–14:29 → Afternoon (中班, index 1)
+- >= 14:30 → Evening (晚班, index 2)
+
+### Stats page charts
+- `computeMonthStats(y, m)` aggregates one month's shifts into `{totalH, workedH, sc, salary, byJob, days, catCounts, wdHours}`
+  - `catCounts` — shift counts per `autoClassIndex` bucket (早/中/晚班), used by `renderCatBreakdown()` (`#cat-breakdown`, `CAT_COLORS`)
+  - `wdHours` — total hours per weekday (`Date.getDay()`, 0=Sun), used by `renderWeekdayChart()` (`#wd-chart`); Sunday/Saturday bars use the same red/blue tint as the calendar weekday headers
+- `renderStats()` calls `computeMonthStats()` for the displayed month and for the previous month (with year wraparound), then calls `renderMomComparison(cur, prev)` to populate `#mom-hours-val` / `#mom-salary-val` (`.mom-pos/.mom-neg/.mom-flat`); shows `—` when the previous month has no shifts
+
+## Design Specs
+
+### CSS color tokens
 ```css
---bg: #faf8f4      暖米色背景
+--bg: #faf8f4      warm cream background
 --card: #ffffff
---dark: #2a2620    深棕黑（today card、FAB、儲存按鈕）
+--dark: #2a2620    dark brown-black (today card, FAB, save buttons)
 --text: #2a2620
---t2: #6b655c      次要文字
---t3: #a8a299      輔助文字
---bd: #ece8e1      邊框
+--t2: #6b655c      secondary text
+--t3: #a8a299      tertiary text
+--bd: #ece8e1      border color
 ```
 
-### 工作顏色盤（10色）
+### Job color palette (10 colors)
 ```js
 const JOB_PALETTE = [
   '#3f9d72','#d9a23f','#6b62c4','#e05252','#0891b2',
@@ -84,9 +110,9 @@ const JOB_PALETTE = [
 ]
 ```
 
-## 注意事項
+## Notes
 
-- 修改任何文字顯示時，**兩種語言（zh/en）都必須同步更新**，靜態 DOM 元素同時更新 `applyLang()`
-- Service Worker 快取版本目前為 `bantu-v2`，每次更動快取策略時須升版
-- 資料遷移函式 `migrateShifts()` 處理 v2（單物件/天）→ v3（陣列/天）的向下相容
-- 不使用任何外部框架或 CDN，保持單檔可離線運作
+- When changing any displayed text, **both languages (zh/en) must be updated together**, and static DOM elements must also be updated in `applyLang()`
+- Service worker cache version is currently `bantu-v3` — bump it whenever `index.html` (or other cached assets) changes, so installed PWA users get the update
+- `migrateShifts()` handles backward compatibility from v2 (single object per day) to v3 (array per day)
+- No external frameworks or CDNs — keep this a single offline-capable file

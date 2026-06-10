@@ -1,43 +1,45 @@
-# 班圖 Bantu
+# Bantu (班圖)
 
-> 排班紀錄、時數統計與薪資估算的 PWA 應用程式
+> A PWA for shift scheduling, hours tracking, and salary estimation
 
-![班圖 Bantu Icon](./icon/bantuicon.png)
+![Bantu Icon](./icon/bantuicon.png)
 
-## 功能
+## Features
 
-- **月曆檢視** — 一眼看出每天的班次與時段，自動標色區分早/中/晚班
-- **多工作支援** — 可新增多份工作（工作1、工作2…），一天可同時有多個班次
-- **薪資估算** — 支援每份工作獨立時薪設定，自動計算加班費
-- **統計報表** — 月份總工時、出勤天數、班次數、各工作分項統計
-- **中英文切換** — 介面支援繁體中文 / English
-- **PWA** — 可安裝至 iPhone/Android 主畫面，離線使用
+- **Calendar view** — see each day's shifts at a glance, auto-colored by morning/afternoon/evening shift
+- **Multi-job support** — add multiple jobs (Job 1, Job 2…), with multiple shifts per day
+- **Salary estimation** — independent hourly rate per job, automatic overtime calculation
+- **Shift templates** — save frequently-used shift presets and apply them with one tap
+- **Monthly deduction** — subtract a fixed monthly amount (e.g. fees) from the estimated salary
+- **Stats reports** — monthly total hours, days worked, shift count, per-job breakdown
+- **Chinese / English toggle** — full UI localization
+- **PWA** — installable to iPhone/Android home screen, works offline
 
-## 使用方式
+## Usage
 
-直接用瀏覽器開啟 `index.html`，或部署至靜態伺服器後以 HTTPS 訪問即可安裝為 PWA。
+Open `index.html` directly in a browser, or deploy to a static server over HTTPS to install as a PWA.
 
-### iPhone 安裝步驟
-1. 用 Safari 開啟網址
-2. 點底部「分享」按鈕
-3. 選「加入主畫面」
+### iPhone install steps
+1. Open the URL in Safari
+2. Tap the "Share" button
+3. Select "Add to Home Screen"
 
-## 專案結構
+## Project Structure
 
 ```
 Bantu_tool/
-├── index.html      # 主程式（單檔 PWA，純 HTML/CSS/JS）
-├── manifest.json   # PWA Manifest
-├── sw.js           # Service Worker（離線快取）
+├── index.html      # Main app (single-file PWA, pure HTML/CSS/JS)
+├── manifest.json   # PWA manifest
+├── sw.js           # Service worker (offline cache)
 ├── icon/
 │   └── bantuicon.png
 └── README.md
 ```
 
-## 資料儲存
+## Data Storage
 
-所有資料儲存於瀏覽器 `localStorage`，不上傳任何伺服器。可於設定頁匯出 JSON 備份。
+All data is stored in the browser's `localStorage` — nothing is uploaded to any server. You can export a JSON backup from the Settings page.
 
-## 開發
+## Development
 
-無任何框架依賴，純 Vanilla HTML/CSS/JavaScript 單檔架構。
+No framework dependencies. Pure vanilla HTML/CSS/JavaScript, single-file architecture.
