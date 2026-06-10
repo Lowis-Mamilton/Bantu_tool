@@ -1,6 +1,6 @@
 {
   "name": "班圖 Bantu",
-  "short_name": "班圖",
+  "short_name": "Bantu",
   "description": "排班紀錄、時數統計與薪資估算",
   "start_url": "./index.html",
   "display": "standalone",
