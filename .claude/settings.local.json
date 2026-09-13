@@ -12,7 +12,11 @@
       "Bash(rm _tmp_check.js)",
       "Bash(gh api *)",
       "Bash(node -e \"const fs=require\\('fs'\\);const html=fs.readFileSync\\('index.html','utf8'\\);const m=html.match\\(/<script>\\([\\\\s\\\\S]*?\\)<\\\\/script>\\(?![\\\\s\\\\S]*<script>\\)/\\);\")",
-      "Bash(grep -rn \"lowis-mamilton\" .)"
+      "Bash(grep -rn \"lowis-mamilton\" .)",
+      "Bash(python3 -)",
+      "Bash(git diff *)",
+      "Bash(node /private/tmp/claude-501/-Users-8173barry-Repo-Bantu-tool/0bfd9834-8d94-4a8c-a253-ba0cb0d1825c/scratchpad/imp.js)",
+      "Bash(node /private/tmp/claude-501/-Users-8173barry-Repo-Bantu-tool/0bfd9834-8d94-4a8c-a253-ba0cb0d1825c/scratchpad/audit1.js)"
     ]
   }
 }

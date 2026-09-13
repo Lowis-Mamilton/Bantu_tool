@@ -245,9 +245,22 @@ nav{position:fixed;bottom:0;left:0;right:0;height:calc(var(--nav-h) + var(--safe
 .btn-save{flex:1;padding:15px;background:var(--dark);color:#faf8f4;border:none;border-radius:14px;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit}
 .btn-save:active{opacity:.8}
 .btn-delete{padding:15px 20px;background:var(--card);color:#c0392b;border:1px solid #e5d2cc;border-radius:14px;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit}
-.form-nav-row{display:flex;gap:8px;padding:10px 22px 0}
-.btn-nav{flex:1;padding:12px;background:var(--card);border:1px solid var(--bd);border-radius:12px;font-size:13px;font-weight:600;color:var(--t2);cursor:pointer;font-family:inherit;transition:background .15s}
+.form-nav-row{display:flex;gap:8px;margin:12px 22px 0;padding:12px 0 0;border-top:1px solid var(--bd)}
+.btn-nav{flex:1;padding:11px 6px;background:var(--card);border:1px solid var(--bd);border-radius:12px;font-size:12px;font-weight:600;color:var(--t2);cursor:pointer;font-family:inherit;transition:background .15s;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .btn-nav:active{background:var(--bd)}
+.imp-summary{margin:4px 22px 0;background:var(--card);border:1px solid var(--bd);border-radius:12px;overflow:hidden}
+.imp-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 15px;border-bottom:1px solid var(--bd);font-size:14px}
+.imp-row:last-child{border-bottom:none}
+.imp-k{color:var(--t2);flex-shrink:0}
+.imp-v{font-weight:600;text-align:right;word-break:break-all}
+.imp-v.imp-hl{color:#c0392b}
+.imp-note{margin:12px 22px 0;padding:11px 14px;background:var(--card);border:1px solid var(--bd);border-radius:12px;font-size:12.5px;line-height:1.55;color:var(--t2)}
+.imp-warn{margin:12px 22px 0;padding:11px 14px;background:#fdf3e7;border:1px solid #f0dcc0;border-radius:12px;font-size:12.5px;line-height:1.55;color:#8a6321}
+.imp-err{margin:4px 22px 0;padding:14px 16px;background:#fce8e6;border:1px solid #f5c6c2;border-radius:12px;font-size:14px;line-height:1.6;color:#c0392b}
+.imp-actions{padding:16px 22px 0;display:flex;flex-direction:column;gap:10px}
+.imp-actions button{width:100%;padding:15px;border-radius:14px;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit}
+.btn-danger{background:var(--card);color:#c0392b;border:1px solid #e5d2cc}
+.btn-plain{background:none;color:var(--t2);border:none;padding:6px}
 .empty-state{text-align:center;padding:36px 20px;color:var(--t2)}
 .empty-state .ei{font-size:44px;margin-bottom:10px}
 .empty-state p{font-size:14px;line-height:1.6}
@@ -452,6 +465,8 @@ nav{position:fixed;bottom:0;left:0;right:0;height:calc(var(--nav-h) + var(--safe
     <div class="sec-label" id="set-sec-data-lbl">資料</div>
     <div class="set-group">
       <div class="set-row" style="cursor:pointer" id="btn-export"><div class="set-icon" style="background:#eaf3ef">📤</div><div class="set-lbl" id="set-lbl-export">匯出資料（JSON）</div><div class="set-val">›</div></div>
+      <div class="set-row" style="cursor:pointer" id="btn-import"><div class="set-icon" style="background:#e8eef5">📥</div><div class="set-lbl" id="set-lbl-import">匯入資料（JSON）</div><div class="set-val">›</div></div>
+      <div class="set-row" style="cursor:pointer;display:none" id="btn-restore"><div class="set-icon" style="background:#f0ebe0">↩️</div><div class="set-lbl" id="set-lbl-restore">復原上次匯入前的資料</div><div class="set-val">›</div></div>
       <div class="set-row" style="cursor:pointer" id="btn-clear"><div class="set-icon" style="background:#fce8e6">🗑️</div><div class="set-lbl" id="set-lbl-clear" style="color:#c0392b">清除所有班次</div></div>
     </div>
     <div style="text-align:center;font-size:12px;color:var(--t3);padding:12px 0 8px" id="set-version">班表 v2.0 · 多工作支援</div>
@@ -494,6 +509,10 @@ nav{position:fixed;bottom:0;left:0;right:0;height:calc(var(--nav-h) + var(--safe
       </div>
       <div id="day-shift-list"></div>
       <button class="add-shift-btn" id="modal-add-btn" onclick="openEditView(null)"></button>
+      <div class="form-nav-row">
+        <button class="btn-nav" id="btn-jump-prev" onclick="jumpDay(-1)"></button>
+        <button class="btn-nav" id="btn-jump-next" onclick="jumpDay(1)"></button>
+      </div>
       <div style="height:8px"></div>
     </div>
     <!-- Edit view -->
@@ -516,13 +535,13 @@ nav{position:fixed;bottom:0;left:0;right:0;height:calc(var(--nav-h) + var(--safe
         <div class="time-row">
           <input type="time" class="form-input" id="f-start" oninput="handleStartChange()">
           <div class="time-sep">→</div>
-          <input type="time" class="form-input" id="f-end" oninput="updatePreview()">
+          <input type="time" class="form-input" id="f-end" oninput="markDirty();updatePreview()">
         </div>
       </div>
       <div class="hours-preview" id="hours-preview"></div>
       <div class="form-group" style="margin-top:10px">
         <div class="form-label" id="f-lbl-note">備註</div>
-        <input type="text" class="form-input" id="f-note">
+        <input type="text" class="form-input" id="f-note" oninput="markDirty()">
       </div>
       <div class="form-actions">
         <button class="btn-delete" id="btn-delete" onclick="deleteShift()" style="display:none"></button>
@@ -535,6 +554,20 @@ nav{position:fixed;bottom:0;left:0;right:0;height:calc(var(--nav-h) + var(--safe
     </div>
   </div>
 </div>
+
+<!-- IMPORT MODAL -->
+<div class="modal-overlay" id="modal-import-overlay" onclick="handleImportOverlayClick(event)">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-head">
+      <div class="modal-title" id="imp-title">匯入資料</div>
+      <button class="modal-close" onclick="closeImportModal()">✕</button>
+    </div>
+    <div id="imp-body"></div>
+    <div style="height:8px"></div>
+  </div>
+</div>
+<input type="file" id="imp-file" accept="application/json,.json" style="display:none">
 
 <script>
 // ── Storage ──
@@ -588,7 +621,27 @@ const LANGS = {
     setStd:'每日標準工時',setStdUnit:'小時',
     setDeduction:'月固定扣款',salDeductLbl:'扣款',
     secData:'資料',
-    setExport:'匯出資料（JSON）',setClear:'清除所有班次',
+    setExport:'匯出資料（JSON）',setImport:'匯入資料（JSON）',setClear:'清除所有班次',
+    impTitle:'匯入資料',
+    impFile:'檔案',impFileData:'檔案內容',impCurData:'目前資料',impConflict:'日期衝突',impCfgRow:'工作與設定',
+    impDaysShifts:(d,s)=>`${d} 天 / ${s} 班`,
+    impDaysN:d=>d===0?'無':`${d} 天`,
+    impJobsTpls:(j,p)=>`${j} 個工作 · ${p} 個固定班次`,
+    impCfgNone:'檔案未包含',
+    impNote:'匯入前會自動備份目前的資料，若匯錯了可以在設定裡復原。',
+    impConflictNote:'衝突的日子會以檔案內容取代；檔案裡沒有的日子不受影響。',
+    impMerge:'合併（衝突日以檔案為準）',
+    impReplace:'完全取代現有資料',
+    impCancel:'取消',
+    impSkipped:n=>`已略過 ${n} 筆格式不正確的資料。`,
+    impBadFile:'無法讀取這個檔案。請確認它是從班圖「匯出資料」產生的 JSON 檔。',
+    impEmpty:'這個檔案裡沒有任何班次資料。',
+    impConfirmReplace:'完全取代會移除目前所有班次，只保留檔案裡的內容。\n\n確定要繼續嗎？（匯入前會自動備份）',
+    impDone:(d,s)=>`匯入完成\n目前共 ${d} 天 / ${s} 班`,
+    setRestore:'復原上次匯入前的資料',
+    impRestoreConfirm:'要把資料還原成上次匯入前的狀態嗎？\n目前的內容會被取代。',
+    impRestoreDone:'已還原成匯入前的資料',
+    impNoBackup:'沒有可復原的備份',
     version:'班圖 Bantu v2.0 · 多工作支援',
     installTitle:'將班圖加入主畫面',
     installDescIOS:'點擊下方分享按鈕，選擇「加入主畫面」',
@@ -596,11 +649,12 @@ const LANGS = {
     installBtn:'安裝',
     modalAddShift:'＋ 新增班次',
     modalNoShifts:'尚無班次，點下方新增',
-    modalNew:'新增班次',modalEdit:'編輯班次',
+    modalNew:md=>`${md} 新增班次`,modalEdit:md=>`${md} 編輯班次`,
     modalBack:'返回',fJob:'工作',fTime:'上下班時間',fNote:'備註',
     fNotePh:'例如：A 櫃台、加班、特殊備注…',
     btnDelete:'刪除',btnSave:'儲存',
-    btnPrev:'← 上一天',btnNext:'下一天 →',
+    btnPrev:md=>`← 存並填 ${md}`,btnNext:md=>`存並填 ${md} →`,
+    navPrevDay:md=>`← ${md}`,navNextDay:md=>`${md} →`,
     delShift:'刪除這筆班次？',
     delJob:'確定刪除此工作？相關班次的工作欄位將保留原 ID。',
     keepJob:'至少保留一個工作',
@@ -656,7 +710,27 @@ const LANGS = {
     setStd:'Standard Daily Hrs',setStdUnit:'hrs',
     setDeduction:'Monthly Deductions',salDeductLbl:'deduct',
     secData:'Data',
-    setExport:'Export Data (JSON)',setClear:'Clear All Shifts',
+    setExport:'Export Data (JSON)',setImport:'Import Data (JSON)',setClear:'Clear All Shifts',
+    impTitle:'Import Data',
+    impFile:'File',impFileData:'In file',impCurData:'Current data',impConflict:'Conflicting days',impCfgRow:'Jobs & settings',
+    impDaysShifts:(d,s)=>`${d} days / ${s} shifts`,
+    impDaysN:d=>d===0?'None':`${d} days`,
+    impJobsTpls:(j,p)=>`${j} jobs · ${p} templates`,
+    impCfgNone:'Not in file',
+    impNote:'Your current data is backed up before importing, so you can restore it from Settings if this goes wrong.',
+    impConflictNote:'Conflicting days are replaced by the file; days not in the file are left untouched.',
+    impMerge:'Merge (file wins on conflicts)',
+    impReplace:'Replace all current data',
+    impCancel:'Cancel',
+    impSkipped:n=>`Skipped ${n} malformed entries.`,
+    impBadFile:'Could not read this file. Make sure it is a JSON file produced by Bantu’s “Export Data”.',
+    impEmpty:'This file contains no shift data.',
+    impConfirmReplace:'Replacing removes all current shifts and keeps only what is in the file.\n\nContinue? (Your current data is backed up first.)',
+    impDone:(d,s)=>`Import complete\nNow ${d} days / ${s} shifts`,
+    setRestore:'Undo last import',
+    impRestoreConfirm:'Restore your data to the state before the last import?\nCurrent content will be replaced.',
+    impRestoreDone:'Restored to the pre-import data',
+    impNoBackup:'No backup available to restore',
     version:'Bantu v2.0 · Multi-job',
     installTitle:'Add Bantu to Home Screen',
     installDescIOS:'Tap the Share button below, then "Add to Home Screen"',
@@ -664,11 +738,12 @@ const LANGS = {
     installBtn:'Install',
     modalAddShift:'+ Add Shift',
     modalNoShifts:'No shifts yet — tap below to add',
-    modalNew:'New Shift',modalEdit:'Edit Shift',
+    modalNew:md=>`New Shift · ${md}`,modalEdit:md=>`Edit Shift · ${md}`,
     modalBack:'Back',fJob:'Job',fTime:'Work Hours',fNote:'Note',
     fNotePh:'e.g. Counter A, OT, special note…',
     btnDelete:'Delete',btnSave:'Save',
-    btnPrev:'← Prev Day',btnNext:'Next Day →',
+    btnPrev:md=>`← Save & ${md}`,btnNext:md=>`Save & ${md} →`,
+    navPrevDay:md=>`← ${md}`,navNextDay:md=>`${md} →`,
     delShift:'Delete this shift?',
     delJob:'Delete this job? Shifts will keep the original job ID.',
     keepJob:'Keep at least one job',
@@ -720,12 +795,18 @@ function migrateShifts(raw){
 }
 function uid(){return Math.random().toString(36).slice(2,10)}
 
+// 把任何來源的 cfg（localStorage 或匯入的檔案）補上缺漏欄位並修掉不合法的值
+function normalizeCfg(raw){
+  const c={...DEFAULT_CFG,...(raw&&typeof raw==='object'&&!Array.isArray(raw)?raw:{})};
+  if(!Array.isArray(c.jobs)||!c.jobs.length) c.jobs=DEFAULT_CFG.jobs;
+  if(!Array.isArray(c.templates)) c.templates=[];
+  if(c.lang!=='zh'&&c.lang!=='en') c.lang='zh';
+  if(!CURRENCIES.find(x=>x.code===c.currency)) c.currency='TWD';
+  return c;
+}
+
 let shifts=migrateShifts(ld(SK,{}));
-let cfg={...DEFAULT_CFG,...ld(CK,{})};
-if(!Array.isArray(cfg.jobs)||!cfg.jobs.length) cfg.jobs=DEFAULT_CFG.jobs;
-if(!Array.isArray(cfg.templates)) cfg.templates=[];
-if(!cfg.lang) cfg.lang='zh';
-if(!CURRENCIES.find(c=>c.code===cfg.currency)) cfg.currency='TWD';
+let cfg=normalizeCfg(ld(CK,{}));
 
 let lang=cfg.lang;
 const L=()=>LANGS[lang];
@@ -835,6 +916,9 @@ function applyLang(){
   document.getElementById('set-lbl-deduction').textContent=L().setDeduction;
   document.getElementById('set-sec-data-lbl').textContent=L().secData;
   document.getElementById('set-lbl-export').textContent=L().setExport;
+  document.getElementById('set-lbl-import').textContent=L().setImport;
+  document.getElementById('set-lbl-restore').textContent=L().setRestore;
+  document.getElementById('imp-title').textContent=L().impTitle;
   document.getElementById('set-lbl-clear').textContent=L().setClear;
   document.getElementById('set-version').textContent=L().version;
   // Modal static
@@ -846,8 +930,7 @@ function applyLang(){
   document.getElementById('f-note').placeholder=L().fNotePh;
   document.getElementById('btn-delete').textContent=L().btnDelete;
   document.getElementById('btn-save').textContent=L().btnSave;
-  document.getElementById('btn-prev-day').textContent=L().btnPrev;
-  document.getElementById('btn-next-day').textContent=L().btnNext;
+  renderDayNavLabels();
   renderInstallBanner();
 }
 
@@ -1128,6 +1211,7 @@ function renderSettings(){
       sv(CK,cfg);
     };
   });
+  document.getElementById('btn-restore').style.display=hasBackup()?'flex':'none';
   renderJobTags();
   renderTemplateTags();
 }
@@ -1285,7 +1369,7 @@ function applyTemplate(tpl){
   document.getElementById('f-start').value=tpl.start;
   document.getElementById('f-end').value=tpl.end;
   document.getElementById('f-note').value=tpl.note||'';
-  updatePreview();
+  markDirty();updatePreview();
 }
 
 document.getElementById('btn-export').onclick=()=>{
@@ -1294,15 +1378,158 @@ document.getElementById('btn-export').onclick=()=>{
 };
 document.getElementById('btn-clear').onclick=()=>{
   if(!confirm(t('clearConfirm'))) return;
-  shifts={};sv(SK,shifts);renderToday();alert(t('cleared'));
+  backupNow();
+  shifts={};sv(SK,shifts);renderToday();renderSettings();alert(t('cleared'));
+};
+
+// ── Import ──
+const BSK='bantu_shifts_v3_bak', BCK='bantu_cfg_v3_bak';
+let pendingImport=null;
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const tallyDays=m=>{let s=0;for(const k in m)s+=m[k].length;return{d:Object.keys(m).length,s}};
+// 任何會蓋掉現有資料的動作前先留一份，讓使用者有路可退
+function backupNow(){sv(BSK,shifts);sv(BCK,cfg)}
+function hasBackup(){return localStorage.getItem(BSK)!==null}
+
+document.getElementById('btn-import').onclick=()=>{
+  const inp=document.getElementById('imp-file');
+  inp.value='';           // 清掉才能重複選同一個檔案
+  inp.click();
+};
+document.getElementById('imp-file').onchange=e=>{
+  const f=e.target.files&&e.target.files[0];
+  if(!f) return;
+  const rd=new FileReader();
+  rd.onload=()=>parseImport(String(rd.result||''),f.name);
+  rd.onerror=()=>showImportError(t('impBadFile'));
+  rd.readAsText(f);
+};
+
+function parseImport(text,fname){
+  let raw;
+  try{raw=JSON.parse(text)}catch{return showImportError(t('impBadFile'))}
+  if(!raw||typeof raw!=='object'||Array.isArray(raw)) return showImportError(t('impBadFile'));
+  // 接受完整匯出檔 {shifts,cfg}，也接受只有一份班表的 map
+  const rawShifts=(raw.shifts&&typeof raw.shifts==='object'&&!Array.isArray(raw.shifts))?raw.shifts:raw;
+  const {days,skipped}=sanitizeImported(rawShifts);
+  if(!Object.keys(days).length) return showImportError(t('impEmpty'));
+  const rawCfg=(raw.cfg&&typeof raw.cfg==='object'&&!Array.isArray(raw.cfg))?raw.cfg:null;
+  pendingImport={days,cfg:rawCfg,skipped,fname};
+  renderImportSummary();
+}
+
+// 只接受看得懂的資料，但保留班次上任何額外欄位（不同版本間來回時才不會弄丟東西）
+function sanitizeImported(raw){
+  const out={},dayRe=/^\d{4}-\d{2}-\d{2}$/,timeRe=/^([01]\d|2[0-3]):[0-5]\d$/;
+  let skipped=0;
+  for(const[k,v]of Object.entries(raw)){
+    if(!dayRe.test(k)){skipped++;continue}
+    const arr=Array.isArray(v)?v:(v&&typeof v==='object'?[v]:null);   // 同時吃 v3 陣列與 v2 單一物件
+    if(!arr){skipped++;continue}
+    const keep=[];
+    for(const s of arr){
+      if(!s||typeof s!=='object'||!timeRe.test(s.start||'')||!timeRe.test(s.end||'')){skipped++;continue}
+      keep.push({...s,id:s.id||uid(),jobId:s.jobId||cfg.jobs[0].id,start:s.start,end:s.end,note:typeof s.note==='string'?s.note:''});
+    }
+    if(keep.length) out[k]=keep;
+  }
+  return {days:out,skipped};
+}
+
+function openImportModal(){
+  document.getElementById('modal-import-overlay').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+function closeImportModal(){
+  document.getElementById('modal-import-overlay').classList.remove('open');
+  document.body.style.overflow='';
+  pendingImport=null;
+}
+function handleImportOverlayClick(e){if(e.target===document.getElementById('modal-import-overlay'))closeImportModal()}
+
+function showImportError(msg){
+  pendingImport=null;
+  document.getElementById('imp-body').innerHTML=
+    `<div class="imp-err">${esc(msg)}</div>
+     <div class="imp-actions"><button class="btn-plain" onclick="closeImportModal()">${esc(t('impCancel'))}</button></div>`;
+  openImportModal();
+}
+
+function renderImportSummary(){
+  const p=pendingImport,f=tallyDays(p.days),c=tallyDays(shifts);
+  const conflict=Object.keys(p.days).filter(k=>(shifts[k]||[]).length).length;
+  const cfgTxt=p.cfg?L().impJobsTpls((p.cfg.jobs||[]).length,(p.cfg.templates||[]).length):t('impCfgNone');
+  document.getElementById('imp-body').innerHTML=
+    `<div class="imp-summary">
+      <div class="imp-row"><span class="imp-k">${esc(t('impFile'))}</span><span class="imp-v">${esc(p.fname)}</span></div>
+      <div class="imp-row"><span class="imp-k">${esc(t('impFileData'))}</span><span class="imp-v">${esc(L().impDaysShifts(f.d,f.s))}</span></div>
+      <div class="imp-row"><span class="imp-k">${esc(t('impCurData'))}</span><span class="imp-v">${esc(L().impDaysShifts(c.d,c.s))}</span></div>
+      <div class="imp-row"><span class="imp-k">${esc(t('impConflict'))}</span><span class="imp-v${conflict?' imp-hl':''}">${esc(L().impDaysN(conflict))}</span></div>
+      <div class="imp-row"><span class="imp-k">${esc(t('impCfgRow'))}</span><span class="imp-v">${esc(cfgTxt)}</span></div>
+     </div>
+     ${p.skipped?`<div class="imp-warn">${esc(L().impSkipped(p.skipped))}</div>`:''}
+     <div class="imp-note">${esc(t('impConflictNote'))}<br>${esc(t('impNote'))}</div>
+     <div class="imp-actions">
+      <button class="btn-save" onclick="applyImport('merge')">${esc(t('impMerge'))}</button>
+      <button class="btn-danger" onclick="applyImport('replace')">${esc(t('impReplace'))}</button>
+      <button class="btn-plain" onclick="closeImportModal()">${esc(t('impCancel'))}</button>
+     </div>`;
+  openImportModal();
+}
+
+function applyImport(mode){
+  const p=pendingImport;if(!p)return;
+  if(mode==='replace'&&!confirm(t('impConfirmReplace'))) return;
+  backupNow();
+  shifts=mode==='replace'?{...p.days}:{...shifts,...p.days};
+  sv(SK,shifts);
+  if(p.cfg){
+    cfg=normalizeCfg(p.cfg);
+    sv(CK,cfg);
+    lang=cfg.lang;applyLang();
+    renderCurrencyOptions();updateCurrencyUI();
+  }
+  closeImportModal();
+  renderSettings();refreshAll();
+  const n=tallyDays(shifts);
+  alert(L().impDone(n.d,n.s));
+}
+
+document.getElementById('btn-restore').onclick=()=>{
+  if(!hasBackup()){alert(t('impNoBackup'));return}
+  if(!confirm(t('impRestoreConfirm'))) return;
+  const bs=ld(BSK,null),bc=ld(BCK,null);
+  if(bs===null){alert(t('impNoBackup'));return}
+  // 先把「現在」也備份起來，復原本身才是可逆的
+  const curS=shifts,curC=cfg;
+  shifts=migrateShifts(bs);sv(SK,shifts);
+  if(bc){cfg=normalizeCfg(bc);sv(CK,cfg);lang=cfg.lang;applyLang();renderCurrencyOptions();updateCurrencyUI()}
+  sv(BSK,curS);sv(BCK,curC);
+  renderSettings();refreshAll();
+  alert(t('impRestoreDone'));
 };
 
 // ── Modal ──
-let modalDateKey=null,editingShiftId=null;
+let modalDateKey=null,editingShiftId=null,formDirty=false,chainEntry=null;
+
+function markDirty(){formDirty=true}
+// 相對於 modalDateKey 位移 dir 天的 "M/D" 字串
+function navDateLabel(dir){
+  const d=pKey(modalDateKey);d.setDate(d.getDate()+dir);
+  return `${d.getMonth()+1}/${d.getDate()}`;
+}
+function renderDayNavLabels(){
+  if(!modalDateKey) return;
+  document.getElementById('btn-prev-day').textContent=L().btnPrev(navDateLabel(-1));
+  document.getElementById('btn-next-day').textContent=L().btnNext(navDateLabel(1));
+  document.getElementById('btn-jump-prev').textContent=L().navPrevDay(navDateLabel(-1));
+  document.getElementById('btn-jump-next').textContent=L().navNextDay(navDateLabel(1));
+}
 
 function openDayModal(key){
   const now=new Date();
   modalDateKey=key||dKey(now);
+  chainEntry=null;
   document.getElementById('modal-overlay').classList.add('open');
   document.body.style.overflow='hidden';
   if((shifts[modalDateKey]||[]).length===0) openEditView(null);
@@ -1314,6 +1541,7 @@ function showDayView(){
   document.getElementById('modal-edit-view').style.display='none';
   const d=pKey(modalDateKey);
   document.getElementById('modal-day-title').textContent=`${d.getMonth()+1}/${d.getDate()} ${L().wdL[d.getDay()]}`;
+  renderDayNavLabels();
   renderDayShiftList();
 }
 
@@ -1333,11 +1561,17 @@ function openEditView(shiftId){
   editingShiftId=shiftId;
   document.getElementById('modal-day-view').style.display='none';
   document.getElementById('modal-edit-view').style.display='';
-  document.getElementById('modal-edit-title').textContent=shiftId?t('modalEdit'):t('modalNew');
+  const md=navDateLabel(0);
+  document.getElementById('modal-edit-title').textContent=shiftId?L().modalEdit(md):L().modalNew(md);
   document.getElementById('btn-delete').style.display=shiftId?'block':'none';
   const ex=shiftId?(shifts[modalDateKey]||[]).find(s=>s.id===shiftId):null;
+  // 新增模式下沿用上一天剛填的內容，方便連續排班（備註不帶，備註是當天專屬的）
+  const base=ex||chainEntry;
+  // 有既有班次或上一天帶過來的內容 → 視為已填，翻日時會存起來；
+  // 全新空白日只有 09:00/18:00 預設值，翻日不會留下多餘的班次
+  formDirty=!!base;
   const picker=document.getElementById('f-job-picker');picker.innerHTML='';
-  const selId=ex?.jobId||cfg.jobs[0].id;
+  const selId=base?.jobId||cfg.jobs[0].id;
   cfg.jobs.forEach(j=>{
     const sel=j.id===selId;
     const btn=document.createElement('button');btn.className='job-option'+(sel?' selected':'');
@@ -1346,24 +1580,26 @@ function openEditView(shiftId){
     btn.onclick=()=>{
       picker.querySelectorAll('.job-option').forEach((b,i)=>{const jc=cfg.jobs[i];if(!jc)return;b.classList.remove('selected');b.style.background='';b.style.borderColor=''});
       btn.classList.add('selected');btn.style.background=j.color;btn.style.borderColor=j.color;
-      updatePreview();
+      markDirty();updatePreview();
     };
     picker.appendChild(btn);
   });
-  document.getElementById('f-start').value=ex?.start||'09:00';
-  document.getElementById('f-end').value=ex?.end||'18:00';
+  document.getElementById('f-start').value=base?.start||'09:00';
+  document.getElementById('f-end').value=base?.end||'18:00';
   document.getElementById('f-note').value=ex?.note||'';
   renderQuickApply();
+  renderDayNavLabels();
   updatePreview();
 }
 
 function closeModal(){
   document.getElementById('modal-overlay').classList.remove('open');
   document.body.style.overflow='';
+  chainEntry=null;formDirty=false;
 }
 function handleOverlayClick(e){if(e.target===document.getElementById('modal-overlay'))closeModal()}
 
-function handleStartChange(){updatePreview()}
+function handleStartChange(){markDirty();updatePreview()}
 
 function updatePreview(){
   const s=document.getElementById('f-start').value,e=document.getElementById('f-end').value;
@@ -1375,25 +1611,45 @@ function updatePreview(){
   wrap.innerHTML=`<span class="hp-badge" style="background:${hex2light(job.color,.75)};color:${job.color}"><span class="hp-dot" style="background:${job.color}"></span>${job.name}</span><span style="font-size:12px;color:${job.color};font-weight:600">${cat}</span><span style="color:var(--t3);font-size:13px">·</span><span class="hp-val" style="color:${job.color}">${h>0?fmtHFull(h):'—'}</span>`;
 }
 
-function navDay(dir){
+// 只跳日、不儲存（當日列表畫面沒有未存的表單資料）
+function jumpDay(dir){
   const d=pKey(modalDateKey);d.setDate(d.getDate()+dir);
-  modalDateKey=dKey(d);editingShiftId=null;
+  modalDateKey=dKey(d);editingShiftId=null;formDirty=false;
   if((shifts[modalDateKey]||[]).length===0) openEditView(null);
   else showDayView();
 }
 
-function saveShift(){
+// 先把表單存起來再跳日；表單沒動過就純跳日，不會塞出多餘的班次
+function navDay(dir){
+  if(formDirty&&!commitShift()) return;
+  const d=pKey(modalDateKey);d.setDate(d.getDate()+dir);
+  modalDateKey=dKey(d);editingShiftId=null;formDirty=false;
+  refreshAll();
+  if((shifts[modalDateKey]||[]).length===0) openEditView(null);
+  else showDayView();
+}
+
+// 把表單寫進 shifts；成功回傳 true，時間沒填完回傳 false
+function commitShift(){
   const selBtn=document.querySelector('#f-job-picker .job-option.selected');
   const jobId=selBtn?(cfg.jobs.find(j=>selBtn.textContent.trim().includes(j.name))?.id||cfg.jobs[0].id):cfg.jobs[0].id;
   const start=document.getElementById('f-start').value,end=document.getElementById('f-end').value;
   const note=document.getElementById('f-note').value.trim();
-  if(!start||!end){alert(t('fillTime'));return}
+  if(!start||!end){alert(t('fillTime'));return false}
   if(!shifts[modalDateKey]) shifts[modalDateKey]=[];
   if(editingShiftId){
     const idx=shifts[modalDateKey].findIndex(s=>s.id===editingShiftId);
     if(idx>-1) shifts[modalDateKey][idx]={id:editingShiftId,jobId,start,end,note};
   } else shifts[modalDateKey].push({id:uid(),jobId,start,end,note});
-  sv(SK,shifts);showDayView();refreshAll();
+  sv(SK,shifts);
+  chainEntry={jobId,start,end};
+  formDirty=false;
+  return true;
+}
+
+function saveShift(){
+  if(!commitShift()) return;
+  showDayView();refreshAll();
 }
 
 function quickDeleteShift(shiftId){
